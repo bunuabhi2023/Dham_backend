@@ -98,7 +98,7 @@ exports.login = async (req,res) => {
           await user.save();
       
           await sendOtpEmail(email, otp, 'login');
-          return res.status(403).json({
+          return res.status(200).json({
               success:true,
               message:`Otp sent to your email ${email} successfully!`,
           });
