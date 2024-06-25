@@ -98,20 +98,20 @@ const users = new mongoose.Schema(
             enum:["Admin", "Hotel"],
             default:"Hotel"
         },
-        nationality:{
-            type:String,
-            required:false,
-            maxLength:255,
+        countryId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Country',
+            required: false,
         },
-        city:{
-            type:String,
-            required:false,
-            maxLength:255,
+        stateId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'State',
+            required: false,
         },
-        state:{
-            type:String,
-            required:false,
-            maxLength:255,
+        cityId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'City',
+            required: false,
         },
         pincode:{
             type:String,
@@ -121,7 +121,7 @@ const users = new mongoose.Schema(
         address:{
             type:String,
             required:false,
-            maxLength:255,
+            maxLength:5000,
         },
         createdAt:{
             type:Date,

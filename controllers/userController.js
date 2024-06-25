@@ -35,18 +35,6 @@ exports.signUp = async (req, res) => {
       email,
       mobile,
       password: hashedPassword,
-      email_otp: null,
-      mobile_otp: null,
-      dob: null,
-      age: null,
-      latitude: null,
-      longitude: null,
-      mobile_verified_at: null,
-      email_verified_at: null,
-      file: null,
-      city: null,
-      pincode: null,
-      address: null,
     });
 
    

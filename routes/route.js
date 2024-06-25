@@ -13,6 +13,7 @@ const faqsController = require('../controllers/faqsController');
 const countryController = require('../controllers/countryController');
 const stateController = require('../controllers/stateController');
 const cityController =  require('../controllers/cityController');
+const hotelController = require('../controllers/hotelController');
 
 
 
@@ -118,6 +119,10 @@ router.get("/get-state-by-country/:countryId",  stateController.getByCountry);
 router.post("/create-city", auth, isAdmin, cityController.createCity);
 router.get("/get-all-city",  cityController.getAllCity);
 router.get("/get-city-by-state/:stateId", cityController.getByState);
+
+//Hotel Management Routes//
+router.post("/create-hotel", auth, isAdmin, hotelController.createHotel);
+router.get("/get-my-hotels", auth, isAdmin, hotelController.getMyHotels);
 
 
 module.exports = router;
