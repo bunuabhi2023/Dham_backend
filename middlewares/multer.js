@@ -6,7 +6,7 @@ config();
 const params = {
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: "ap-south-1", // Set your desired region
+  region: "us-east-1", // Set your desired region
   useAccelerateEndpoint: false, // Disable accelerated endpoint if not needed
 };
 

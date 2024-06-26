@@ -4,12 +4,14 @@ const {catchError} = require('../middlewares/CatchError');
 
 exports.createCity = catchError(async(req, res) =>{
     const {name, stateId} = req.body;
+    
+    const file = req.s3FileUrl;
     const existingCity = await City.findOne({name:name,stateId:stateId });
     if(existingCity){
         return res.status(409).json({message:"Enterd City Name is already exist For Given State"});
     }
 
-    const newCity = new City({name, stateId});
+    const newCity = new City({name, stateId, file});
     const savedCity = await newCity.save();
 
     return res.status(200).json({city:savedCity});

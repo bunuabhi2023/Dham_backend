@@ -116,7 +116,7 @@ router.get("/get-all-states",  stateController.getAllState);
 router.get("/get-state-by-country/:countryId",  stateController.getByCountry);
 
 //City Route//
-router.post("/create-city", auth, isAdmin, cityController.createCity);
+router.post("/create-city",imageSingleUpload, auth, isAdmin, cityController.createCity);
 router.get("/get-all-city",  cityController.getAllCity);
 router.get("/get-city-by-state/:stateId", cityController.getByState);
 
