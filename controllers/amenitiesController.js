@@ -16,3 +16,8 @@ exports.createAmenity = catchError(async(req, res) =>{
 
 });
 
+exports.getAmenities = catchError(async(req, res) =>{
+    const amenities = await Amenity.find();
+    return res.status(200).json({data:amenities});
+})
+

@@ -14,6 +14,9 @@ const countryController = require('../controllers/countryController');
 const stateController = require('../controllers/stateController');
 const cityController =  require('../controllers/cityController');
 const hotelController = require('../controllers/hotelController');
+const hotelRoomsController = require('../controllers/hotelRoomsController');
+const amenitiesController = require('../controllers/amenitiesController');
+const roomCategoryController = require('../controllers/roomCategoryController');
 
 
 
@@ -119,10 +122,24 @@ router.get("/get-state-by-country/:countryId",  stateController.getByCountry);
 router.post("/create-city",imageSingleUpload, auth, isAdmin, cityController.createCity);
 router.get("/get-all-city",  cityController.getAllCity);
 router.get("/get-city-by-state/:stateId", cityController.getByState);
+router.put("/update-city/:id",imageSingleUpload, auth, isAdmin, cityController.updateCity);
+
+//Hotel Room Ctegory Routes//
+router.post("/create-room-category", auth, isAdmin, roomCategoryController.createRoomCategory);
+router.get("/get-all-room-categories", roomCategoryController.getAllRoomCategory);
+
+//Amenity Route//
+router.post("/create-amenity",imageSingleUpload, auth, isAdmin, amenitiesController.createAmenity);
+router.get("/get-amenities", amenitiesController.getAmenities);
+
 
 //Hotel Management Routes//
 router.post("/create-hotel", auth, isAdmin, hotelController.createHotel);
 router.get("/get-my-hotels", auth, isAdmin, hotelController.getMyHotels);
+
+//Hotel Rooms Management//
+router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);
+router.get("/get-rooms-by-admin", auth, isAdmin, hotelRoomsController.getAllHotelsRooms);
 
 
 module.exports = router;
