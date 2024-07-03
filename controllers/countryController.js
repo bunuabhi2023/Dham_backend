@@ -46,7 +46,7 @@ exports.updateCountry = catchError(async(req, res) =>{
     const existingCountry = await Country.findById(req.params.id);
 
     if (!existingCountry) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'Country not found' });
     }
 
     
@@ -67,7 +67,7 @@ exports.updateCountry = catchError(async(req, res) =>{
         { new: true }
       );
   
-    res.status(200).json({user:updatedCountry});
+    res.status(200).json({country:updatedCountry});
 });
 
 exports.deleteCountry = catchError(async(req, res) =>{

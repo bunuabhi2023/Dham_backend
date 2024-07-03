@@ -112,17 +112,23 @@ router.get("/get-country-by-super-admin", auth, isAdmin, countryController.getCo
 router.get("/get-country", countryController.getCountry);
 router.get("/get-country-by-id/:id", countryController.getCountryById);
 router.put("/update-country/:id",  auth, isAdmin, countryController.updateCountry);
+router.delete("/delete-country/:id", auth, isAdmin, countryController.deleteCountry);
 
 //State Route//
 router.post("/create-state", auth, isAdmin, stateController.createState);
+router.get("/get-state-by-admin", auth, isAdmin, stateController.getStateBySuperAdmin);
+router.put("/update-state/:id", auth, isAdmin, stateController.updateSate);
 router.get("/get-all-states",  stateController.getAllState);
 router.get("/get-state-by-country/:countryId",  stateController.getByCountry);
+router.delete("/delete-state/:id", auth, isAdmin, stateController.deleteState);
 
 //City Route//
 router.post("/create-city",imageSingleUpload, auth, isAdmin, cityController.createCity);
 router.get("/get-all-city",  cityController.getAllCity);
 router.get("/get-city-by-state/:stateId", cityController.getByState);
 router.put("/update-city/:id",imageSingleUpload, auth, isAdmin, cityController.updateCity);
+router.delete("/delete-city/:id", auth, isAdmin, cityController.deleteCity);
+router.get("/get-city-by-admin", auth, isAdmin, cityController.getCityBySuperAdmin);
 
 //Hotel Room Ctegory Routes//
 router.post("/create-room-category", auth, isAdmin, roomCategoryController.createRoomCategory);

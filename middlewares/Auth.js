@@ -52,7 +52,7 @@ exports.isAdmin = (req,res,next) => {
     catch(error) {
         return res.status(405).json({
             success:false,
-            message:'Method not allowed',
+            message:'Unauthorized User',
         })
     }
 }
@@ -70,7 +70,7 @@ exports.isHotel = (req,res,next) => {
 catch(error) {
     return res.status(405).json({
         success:false,
-        message:'Method not allowed',
+        message:'Unauthorized User',
     })
 }
 }

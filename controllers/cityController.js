@@ -28,6 +28,28 @@ exports.getByState = catchError(async(req, res)=>{
     return res.status(200).json({cities:cities});
 });
 
+
+exports.getCityBySuperAdmin = catchError(async(req, res) =>{
+    const { search, page = 1, pageSize = 10 } = req.query;
+    const skip = (page - 1) * pageSize;
+    const query = {};
+    
+    if (req.query.stateId) {
+        query.stateId = req.query.stateId; 
+    }
+    if (req.query.name) {
+        query.name = { $regex:req.query.name, $options: 'i' };
+    }
+    const cities = await City.find(query).populate('stateId', 'name').skip(skip).limit(pageSize).exec();
+  
+
+    return res.status(200).json({
+        cities,
+        currentPage: page,
+        totalPages: Math.ceil(await City.countDocuments(query) / pageSize),
+      });
+});
+
 exports.updateCity = catchError(async(req, res ) => {
     const {name, stateId} = req.body;
 
@@ -45,4 +67,10 @@ exports.updateCity = catchError(async(req, res ) => {
 
     return res.status(200).json({message:"City Updated Successfully!", data:city});
 
+});
+
+exports.deleteCity = catchError(async(req, res) =>{
+    const deleteCity = await City.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({message:"Record Deleted Successfully!"});
 })
