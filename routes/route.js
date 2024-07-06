@@ -140,7 +140,8 @@ router.get("/get-amenities", amenitiesController.getAmenities);
 
 
 //Hotel Management Routes//
-router.post("/create-hotel", auth, isAdmin, hotelController.createHotel);
+router.post("/create-hotel", imageMultiUpload, auth, isAdmin, hotelController.createHotel);
+router.put("/update-hotel/:id",imageMultiUpload, auth, isAdmin, hotelController.updateHotel);
 router.get("/get-my-hotels", auth, isAdmin, hotelController.getMyHotels);
 
 //Hotel Rooms Management//

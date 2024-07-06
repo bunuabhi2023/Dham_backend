@@ -6,7 +6,8 @@ const bcrypt = require('bcryptjs');
 const {catchError} = require('../middlewares/CatchError');
 
 exports.createHotel = catchError(async(req, res) =>{
-    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address } = req.body;
+    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location } = req.body;
+    const files = req.s3FileUrls;
     const existingUser = await User.findOne({
         $or: [{ email }, { mobile }],
     });
@@ -16,6 +17,17 @@ exports.createHotel = catchError(async(req, res) =>{
     }
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const latestHotel = await User.findOne({ hotelName: { $regex: /^Dham-\d+$/i } }).sort({ hotelName: -1 });
+
+    let newHotelName;
+    if (latestHotel) {
+        const latestNumber = parseInt(latestHotel.hotelName.split('-')[1], 10);
+        const newNumber = latestNumber + 1;
+        newHotelName = `Dham-${newNumber}`;
+    } else {
+        newHotelName = 'Dham-1';
+    }
 
     const newHotel = new User({
       name,
@@ -27,6 +39,9 @@ exports.createHotel = catchError(async(req, res) =>{
       cityId,
       pincode,
       address,
+      hotelName: newHotelName,
+      location,
+      files
     });
 
    
@@ -35,6 +50,42 @@ exports.createHotel = catchError(async(req, res) =>{
     return res.status(201).json({ message: 'New Hotel created successfully' });
 
     
+});
+
+exports.updateHotel = catchError(async(req, res) =>{
+  const hotel = await User.findById(req.params.id);
+
+  if(!hotel){
+    res.status(404).json({message:"Hotel Not Found."});
+  }
+
+  const { name, email, mobile,  countryId, stateId, cityId, pincode, address } = req.body;
+  const files = req.s3FileUrls;
+   
+  const duplicateHotel = await User.findOne({
+    $and: [
+      { _id: { $ne: req.params.id } }, 
+      {email:email, mobile:mobile}, 
+    ],
+  });
+
+  if(duplicateHotel){
+      return res.status(401).json({message:"Entered Email or Mobile Already Exist FOr Other User!"});
+  }
+
+  hotel.name = name;
+  hotel.email = email;
+  hotel.mobile = mobile;
+  hotel.countryId = countryId;
+  hotel.stateId = stateId;
+  hotel.cityId = cityId;
+  hotel.pincode = pincode;
+  hotel.address = address;
+  hotel.files = files;
+  hotel.save();
+
+  res.status(201).json({message:"Hotel Updated Successfully"});
+
 });
 
 exports.getMyHotels = catchError(async(req, res) => {    

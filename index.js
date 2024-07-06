@@ -13,8 +13,9 @@ app.use('/backend/uploads', express.static('uploads'));
 app.use(
     cors({
         origin: [
+            "http://127.0.0.1:5173",
+            'http://localhost:5173',
             "http://localhost:3000",
-            "https://escorts-service-3603b.web.app",
           ],
           credentials: true,
     })

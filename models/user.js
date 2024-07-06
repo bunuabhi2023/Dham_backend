@@ -7,6 +7,11 @@ const users = new mongoose.Schema(
             required:true,
             maxLength:255,
         },
+        hotelName:{
+            type:String,
+            required:false,
+            maxLength:255,
+        },
         email: {
             type:String,
             required:true,
@@ -48,7 +53,7 @@ const users = new mongoose.Schema(
         location: {
             type: {
               type: String,
-              enum: ["Point"], // Specify that it's a GeoJSON Point
+              enum: ["Point"],
               required: false,
             },
             coordinates: {
@@ -56,7 +61,6 @@ const users = new mongoose.Schema(
               required: false,
               validate: {
                 validator: function (value) {
-                  // Ensure coordinates are valid [longitude, latitude] pairs
                   return Array.isArray(value) && value.length === 2 && isFinite(value[0]) && isFinite(value[1]);
                 },
                 message: "Invalid coordinates",
