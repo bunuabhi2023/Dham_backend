@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const Country = require("../models/country");
 const State = require("../models/state");
+const NearBy = require("../models/nearby");
+const Guid = require("../models/guid");
 const City = require("../models/city");
 const bcrypt = require('bcryptjs');
 const {catchError} = require('../middlewares/CatchError');
@@ -59,7 +61,7 @@ exports.updateHotel = catchError(async(req, res) =>{
     res.status(404).json({message:"Hotel Not Found."});
   }
 
-  const { name, email, mobile,  countryId, stateId, cityId, pincode, address } = req.body;
+  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location } = req.body;
   const files = req.s3FileUrls;
    
   const duplicateHotel = await User.findOne({
@@ -82,6 +84,7 @@ exports.updateHotel = catchError(async(req, res) =>{
   hotel.pincode = pincode;
   hotel.address = address;
   hotel.files = files;
+  hotel.location = location;
   hotel.save();
 
   res.status(201).json({message:"Hotel Updated Successfully"});
@@ -130,6 +133,71 @@ exports.getMyHotels = catchError(async(req, res) => {
         currentPage: page,
         totalPages: Math.ceil(await User.countDocuments(query) / pageSize),
       });
+});
+
+
+exports.getHotelsForUser = catchError(async(req, res) =>{
+
+    let query = {};
+    query.role = 'Hotel'
+    if (req.query.search) {
+      const searchValue = req.query.search.trim(); 
+      const searchRegex = new RegExp(`^${searchValue}$`, 'i');
+
+      console.log("Regex pattern:", searchRegex); 
+      const city = await City.findOne({ name: searchRegex });
+
+      if(city){
+        query.cityId = city._id;
+      }
+
+      query.hotelName = searchRegex;
+  
+      // query = {
+      //     ...query,
+      //     $or: [
+      //         { name: req.query.search }, 
+      //         { cityId: city ? city._id : null }
+      //     ]
+      // };
+  
+  }
+
+  if (req.query.hotelName) {
+      query.hotelName = req.query.hotelName; 
+  }
+
+  if (req.query.cityId) {
+      query.cityId = req.query.cityId; 
+  }
+  const users = await User.find(query).select('-password').populate('cityId', 'name');
+
+  let nearBy = [];
+  let giud = [];
+
+  for (const user of users) {
+    const cityId = user.cityId;
+
+    const nearbies = await NearBy.find({cityId:cityId});
+
+    const guids = await Guid.find({cityId:cityId});
+
+    nearBy.push(nearbies); 
+
+    giud.push(guids);
+
+}
+
+const data = {
+  'hotel': users,
+  'nearBy': nearBy,
+  'guid': giud
+}
+ 
+
+
+ return res.status(200).json(data);
+
 });
 
 function escapeRegex(text) {

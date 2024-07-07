@@ -17,6 +17,8 @@ const hotelController = require('../controllers/hotelController');
 const hotelRoomsController = require('../controllers/hotelRoomsController');
 const amenitiesController = require('../controllers/amenitiesController');
 const roomCategoryController = require('../controllers/roomCategoryController');
+const nearbyController = require('../controllers/nearbyController');
+const guidController = require('../controllers/guidController');
 
 
 
@@ -143,10 +145,17 @@ router.get("/get-amenities", amenitiesController.getAmenities);
 router.post("/create-hotel", imageMultiUpload, auth, isAdmin, hotelController.createHotel);
 router.put("/update-hotel/:id",imageMultiUpload, auth, isAdmin, hotelController.updateHotel);
 router.get("/get-my-hotels", auth, isAdmin, hotelController.getMyHotels);
+router.get("/get-hotels", hotelController.getHotelsForUser);
 
 //Hotel Rooms Management//
 router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);
 router.get("/get-rooms-by-admin", auth, isAdmin, hotelRoomsController.getAllHotelsRooms);
+
+//Near By Routes//
+router.post("/create-nearby", imageSingleUpload, auth, isAdmin, nearbyController.createNearBy);
+
+//Guid Route//
+router.post("/create-guid", imageSingleUpload, auth, isAdmin, guidController.createGuid);
 
 
 module.exports = router;
