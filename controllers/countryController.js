@@ -1,5 +1,6 @@
 const Country = require('../models/country');
 const {catchError} = require('../middlewares/CatchError');
+const { count } = require('../models/user');
 
 exports.saveCountry = catchError(async(req, res) =>{
     const {name} = req.body;
@@ -27,6 +28,7 @@ exports.getCountryBySuperAdmin = catchError(async(req, res) =>{
         countries,
         currentPage: page,
         totalPages: Math.ceil(await Country.countDocuments(query) / pageSize),
+        count: Math.ceil(await Country.countDocuments(query))
       });
 });
 

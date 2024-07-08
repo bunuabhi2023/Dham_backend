@@ -47,6 +47,7 @@ exports.getCityBySuperAdmin = catchError(async(req, res) =>{
         cities,
         currentPage: page,
         totalPages: Math.ceil(await City.countDocuments(query) / pageSize),
+        count: Math.ceil(await City.countDocuments(query))
       });
 });
 

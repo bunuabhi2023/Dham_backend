@@ -40,6 +40,7 @@ exports.getStateBySuperAdmin = catchError(async(req, res) =>{
         states,
         currentPage: page,
         totalPages: Math.ceil(await State.countDocuments(query) / pageSize),
+        count:Math.ceil(await State.countDocuments(query))
       });
 });
 
