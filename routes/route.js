@@ -146,6 +146,7 @@ router.post("/create-hotel", imageMultiUpload, auth, isAdmin, hotelController.cr
 router.put("/update-hotel/:id",imageMultiUpload, auth, isAdmin, hotelController.updateHotel);
 router.get("/get-my-hotels", auth, isAdmin, hotelController.getMyHotels);
 router.get("/get-hotels", hotelController.getHotelsForUser);
+router.get("/get-all-hotels", hotelController.getAllHotels);
 
 //Hotel Rooms Management//
 router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);

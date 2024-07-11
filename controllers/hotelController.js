@@ -200,6 +200,21 @@ const data = {
 
 });
 
+
+exports.getAllHotels = catchError(async(req, res) => {    
+
+  let query = {};
+  query.role = 'Hotel'
+
+  const hotels = await User.find(query)
+  .select('_id hotelName') 
+  .exec();
+
+    return res.status(200).json({
+      hotels
+    });
+});
+
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
