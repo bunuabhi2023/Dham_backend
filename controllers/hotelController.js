@@ -151,7 +151,10 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
         query.cityId = city._id;
       }
 
-      query.hotelName = searchRegex;
+      else{
+
+        query.hotelName = searchRegex;
+      }
   
       // query = {
       //     ...query,
@@ -200,6 +203,12 @@ const data = {
 
 });
 
+exports.getHotelById = catchError(async(req, res) =>{
+  const hotel = await User.findById(req.params.id);
+
+  return res.status(200).json({data:hotel});
+})
+
 
 exports.getAllHotels = catchError(async(req, res) => {    
 
@@ -214,6 +223,12 @@ exports.getAllHotels = catchError(async(req, res) => {
       hotels
     });
 });
+
+exports.deleteHotel = catchError(async(req, res) =>{
+  const deleteHotel = await User.findByIdAndDelete(req.params.id);
+
+  return res.status(200).json({message:"Record Deleted Successfully!"});
+})
 
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");

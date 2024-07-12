@@ -62,3 +62,29 @@ exports.getAllHotelsRooms = catchError(async(req, res) =>{
     });
 
 });
+
+
+exports.getRoomsById = catchError(async(req, res) =>{
+    const room = await HotelsRooms.findById(req.params.id);
+    res.status(200).json({data:room});
+});
+
+exports.updateHotelRoom = catchError(async(req, res) =>{
+    const {roomCategoryId, amenitiesId, price, offerPrice, totalNoOfRooms, area, floor, bedSize} = req.body;
+
+    const files = req.s3FileUrls;
+
+    const room = await HotelsRooms.findById(req.params.id);
+
+    room.roomCategoryId = roomCategoryId;
+    room.amenitiesId = amenitiesId;
+    room.price = price;
+    room.offerPrice = offerPrice;
+    room.totalNoOfRooms= totalNoOfRooms;
+    room.area = area;
+    room.floor = floor;
+    room.bedSize = bedSize;
+    room.files = files;
+    room.save();
+    return res.status(200).json({message:"Room Created Successfully!", data:room});
+})

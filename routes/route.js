@@ -147,10 +147,14 @@ router.put("/update-hotel/:id",imageMultiUpload, auth, isAdmin, hotelController.
 router.get("/get-my-hotels", auth, isAdmin, hotelController.getMyHotels);
 router.get("/get-hotels", hotelController.getHotelsForUser);
 router.get("/get-all-hotels", hotelController.getAllHotels);
+router.get("/get-hotel-by-id/:id", hotelController.getHotelById);
+router.delete("/delete-hotel/:id", auth, isAdmin, hotelController.deleteHotel);
 
 //Hotel Rooms Management//
 router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);
 router.get("/get-rooms-by-admin", auth, isAdmin, hotelRoomsController.getAllHotelsRooms);
+router.get("/get-room-by-id/:id", hotelRoomsController.getRoomsById);
+router.post("/update-room/:id", auth, hotelRoomsController.updateHotelRoom);
 
 //Near By Routes//
 router.post("/create-nearby", imageSingleUpload, auth, isAdmin, nearbyController.createNearBy);
