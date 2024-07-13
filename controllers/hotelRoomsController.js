@@ -70,8 +70,18 @@ exports.getRoomsById = catchError(async(req, res) =>{
 });
 
 exports.updateHotelRoom = catchError(async(req, res) =>{
-    const {roomCategoryId, amenitiesId, price, offerPrice, totalNoOfRooms, area, floor, bedSize} = req.body;
+    console.log('Request body:', req.body); // Log received data
 
+    const {
+      roomCategoryId,
+      amenitiesId,
+      price,
+      offerPrice,
+      totalNoOfRooms,
+      area,
+      floor,
+      bedSize,
+    } = req.body;
     const files = req.s3FileUrls;
 
     const room = await HotelsRooms.findById(req.params.id);
@@ -85,6 +95,13 @@ exports.updateHotelRoom = catchError(async(req, res) =>{
     room.floor = floor;
     room.bedSize = bedSize;
     room.files = files;
-    room.save();
-    return res.status(200).json({message:"Room Created Successfully!", data:room});
+   await room.save();
+    return res.status(200).json({message:"Room updated Successfully!", data:room});
+});
+
+exports.deleteHotelRoom = catchError(async(req, res) =>{
+    const deleteHotelRoom = await HotelsRooms.findByIdAndDelete(req.params.id);
+  
+    return res.status(200).json({message:"Record Deleted Successfully!"});
+
 })

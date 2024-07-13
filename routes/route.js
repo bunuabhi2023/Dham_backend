@@ -135,10 +135,16 @@ router.get("/get-city-by-admin", auth, isAdmin, cityController.getCityBySuperAdm
 //Hotel Room Ctegory Routes//
 router.post("/create-room-category", auth, isAdmin, roomCategoryController.createRoomCategory);
 router.get("/get-all-room-categories", roomCategoryController.getAllRoomCategory);
+router.get("/get-room-category-by-id/:id", roomCategoryController.getRoomCategoryById);
+router.put("/update-room-category/:id", auth, isAdmin, roomCategoryController.updateRoomCategory);
+router.delete("/delete-room-category/:id", auth, isAdmin, roomCategoryController.deleteRoomCategory);
 
 //Amenity Route//
 router.post("/create-amenity",imageSingleUpload, auth, isAdmin, amenitiesController.createAmenity);
 router.get("/get-amenities", amenitiesController.getAmenities);
+router.get("/get-amenity-by-id/:id", amenitiesController.getAmenitiesById);
+router.put("/update-amenity/:id", imageSingleUpload, auth, isAdmin, amenitiesController.updateAmenity);
+router.delete("/delete-amenity/:id", auth, isAdmin, amenitiesController.deleteAmenity);
 
 
 //Hotel Management Routes//
@@ -154,7 +160,8 @@ router.delete("/delete-hotel/:id", auth, isAdmin, hotelController.deleteHotel);
 router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);
 router.get("/get-rooms-by-admin", auth, isAdmin, hotelRoomsController.getAllHotelsRooms);
 router.get("/get-room-by-id/:id", hotelRoomsController.getRoomsById);
-router.post("/update-room/:id", auth, hotelRoomsController.updateHotelRoom);
+router.put("/update-room-by-super-admin/:id", imageMultiUpload, auth, isAdmin, hotelRoomsController.updateHotelRoom);
+router.delete("/delete-room/:id", auth, isAdmin, hotelRoomsController.deleteHotelRoom);
 
 //Near By Routes//
 router.post("/create-nearby", imageSingleUpload, auth, isAdmin, nearbyController.createNearBy);
