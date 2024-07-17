@@ -165,9 +165,15 @@ router.delete("/delete-room/:id", auth, isAdmin, hotelRoomsController.deleteHote
 
 //Near By Routes//
 router.post("/create-nearby", imageSingleUpload, auth, isAdmin, nearbyController.createNearBy);
+router.put("/update-nearby/:id", imageSingleUpload, auth, isAdmin, nearbyController.updateNearBy);
+router.get("/get-all-nearby",  auth, isAdmin, nearbyController.getAllNearBy);
 
 //Guid Route//
 router.post("/create-guid", imageSingleUpload, auth, isAdmin, guidController.createGuid);
+router.put("/update-guid/:id", imageSingleUpload, auth, isAdmin, guidController.editGuid);
+router.get("/get-guid-by-city/:cityId", guidController.getGuidByCity);
+router.get("/get-all-guid",auth, isAdmin, guidController.getAllGuids);
+router.delete("/delete-guid/:id", auth, isAdmin, guidController.deleteGuid);
 
 
 module.exports = router;
