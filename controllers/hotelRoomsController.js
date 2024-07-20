@@ -59,6 +59,7 @@ exports.getAllHotelsRooms = catchError(async(req, res) =>{
         rooms,
         currentPage: page,
         totalPages: Math.ceil(await HotelsRooms.countDocuments(query) / pageSize),
+        count: Math.ceil(await HotelsRooms.countDocuments(query)),
     });
 
 });

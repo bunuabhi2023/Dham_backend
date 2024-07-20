@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs');
 const {catchError} = require('../middlewares/CatchError');
 
 exports.createHotel = catchError(async(req, res) =>{
-    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location } = req.body;
+    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice } = req.body;
     const files = req.s3FileUrls;
     const existingUser = await User.findOne({
         $or: [{ email }, { mobile }],
@@ -20,7 +20,7 @@ exports.createHotel = catchError(async(req, res) =>{
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const latestHotel = await User.findOne({ hotelName: { $regex: /^Dham-\d+$/i } }).sort({ hotelName: -1 });
+    const latestHotel = await User.findOne({ hotelName: { $regex: /^Dham-\d+$/i } }).sort({ _id: -1 });
 
     let newHotelName;
     if (latestHotel) {
@@ -42,6 +42,8 @@ exports.createHotel = catchError(async(req, res) =>{
       pincode,
       address,
       hotelName: newHotelName,
+      price,
+      offerPrice,
       location,
       files
     });
@@ -61,7 +63,7 @@ exports.updateHotel = catchError(async(req, res) =>{
     res.status(404).json({message:"Hotel Not Found."});
   }
 
-  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location } = req.body;
+  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location, price, offerPrice } = req.body;
   const files = req.s3FileUrls;
    
   const duplicateHotel = await User.findOne({
@@ -85,6 +87,8 @@ exports.updateHotel = catchError(async(req, res) =>{
   hotel.address = address;
   hotel.files = files;
   hotel.location = location;
+  hotel.price = price; 
+  hotel.offerPrice = offerPrice;
   hotel.save();
 
   res.status(201).json({message:"Hotel Updated Successfully"});
@@ -132,6 +136,7 @@ exports.getMyHotels = catchError(async(req, res) => {
         hotels,
         currentPage: page,
         totalPages: Math.ceil(await User.countDocuments(query) / pageSize),
+        count: Math.ceil(await User.countDocuments(query)),
       });
 });
 
@@ -155,14 +160,6 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
 
         query.hotelName = searchRegex;
       }
-  
-      // query = {
-      //     ...query,
-      //     $or: [
-      //         { name: req.query.search }, 
-      //         { cityId: city ? city._id : null }
-      //     ]
-      // };
   
   }
 

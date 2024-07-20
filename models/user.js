@@ -127,6 +127,14 @@ const users = new mongoose.Schema(
             required:false,
             maxLength:5000,
         },
+        price:{
+            type:Number,
+            required:true
+        },
+        offerPrice:{
+            type:Number,
+            required:true
+        },
         createdAt:{
             type:Date,
             required:true,

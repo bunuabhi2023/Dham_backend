@@ -17,8 +17,24 @@ exports.createAmenity = catchError(async(req, res) =>{
 });
 
 exports.getAmenities = catchError(async(req, res) =>{
-    const amenities = await Amenity.find();
-    return res.status(200).json({data:amenities});
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+
+    let query = {};
+    
+    if (req.query.name) {
+        query.name = req.query.name; 
+    }
+    const amenities = await Amenity.find(query)
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .lean();
+    return res.status(200).json({
+        data:amenities,
+        currentPage: page,
+        totalPages: Math.ceil(await Amenity.countDocuments(query) / pageSize),
+        count: Math.ceil(await Amenity.countDocuments(query)),
+    });
 });
 
 exports.getAmenitiesById = catchError(async(req, res) =>{
