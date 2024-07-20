@@ -1,12 +1,19 @@
 const Advertisement = require('../models/advertisement');
 
 const createAdvertisement = async (req, res) => {
-    const { title} = req.body;
+    const { title, description, validFrom, validUpto, offerOnItem, cityId, discountPercentage, discountAmount} = req.body;
     const createdBy = req.user.id;
     const file = req.s3FileUrl;
 
    const newAdvertisement = new Advertisement({
-    title,
+    title, 
+    description, 
+    validFrom, 
+    validUpto, 
+    offerOnItem, 
+    cityId, 
+    discountPercentage, 
+    discountAmount,
     file,
     createdBy,
     });
@@ -23,11 +30,18 @@ const createAdvertisement = async (req, res) => {
 
 const updateAdvertisement = async (req, res) => {
   
-    const { title} = req.body;
+  const { title, description, validFrom, validUpto, offerOnItem, cityId, discountPercentage, discountAmount} = req.body;
     const updatedBy = req.user.id;
       const file = req.s3FileUrl;
       updateFields = {
-        title,
+        title, 
+        description, 
+        validFrom, 
+        validUpto, 
+        offerOnItem, 
+        cityId, 
+        discountPercentage, 
+        discountAmount,
         file,
         updatedBy,
         updatedAt: Date.now(),
@@ -47,7 +61,7 @@ const updateAdvertisement = async (req, res) => {
       }
 
       console.log(updatedAdvertisement);
-      res.json(updatedAdvertisement);
+     return res.status(200).json({data:updatedAdvertisement, message:"Record Updated Successfully!"});
     } catch (error) {
       console.error(error); // Add this line for debug logging
       return res.status(500).json({ error: 'Failed to update Advertisement' });
@@ -57,7 +71,7 @@ const updateAdvertisement = async (req, res) => {
 // Function to get all Advertisement
 const getAllAdvertisement = async (req, res)  => {
   try {
-    const advertisements = await Advertisement.find({status:'Publish'})
+    const advertisements = await Advertisement.find()
       .populate('createdBy', 'name')
       .populate('updatedBy', 'name')
       .exec();
@@ -71,12 +85,23 @@ const getAllAdvertisement = async (req, res)  => {
 
 const getAllAdvertisementForAdmin = async (req, res)  => {
   try {
-    const advertisements = await Advertisement.find()
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+
+    let query = {};
+    const advertisements = await Advertisement.find(query)
       .populate('createdBy', 'name')
       .populate('updatedBy', 'name')
-      .exec();
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .lean();
       
-        res.json(advertisements);
+      return res.status(200).json({
+        advertisements,
+        currentPage: page,
+        totalPages: Math.ceil(await Advertisement.countDocuments(query) / pageSize),
+        count: Math.ceil(await Advertisement.countDocuments(query)),
+      });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Failed to fetch discounts' });

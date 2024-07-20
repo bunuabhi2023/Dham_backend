@@ -7,6 +7,11 @@ const advertisements = new mongoose.Schema(
             required:true,
             maxLength:255,
         },
+        description:{
+            type:String,
+            required:false,
+            maxLength:1000,
+        },
         file:{
             Bucket:{
                 type:String,
@@ -24,15 +29,37 @@ const advertisements = new mongoose.Schema(
                 maxLength:255,
             }
         },
-        status: {
-            type:String,
-            enum:["Publish", "Draft", "Pending"],
-            default: "Draft"
+        validFrom:{
+            type:Date,
+            required:true,
+            default:null,
+
         },
-        
-        isOpenOnLoad: {
-            type:Boolean,
-            default: false
+        validUpto:{
+            type:Date,
+            required:true,
+            default:null,
+
+        },
+        offerOnItem:{
+            type:String,
+            required:false,
+            maxLength:255,
+        },
+        cityId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'City',
+            required: false,
+        },
+        discountPercentage:{
+            type:Number,
+            required:false,
+            default:null,
+        },
+        discountAmount:{
+            type:Number,
+            required:false,
+            default:null,
         },
         createdAt:{
             type:Date,
