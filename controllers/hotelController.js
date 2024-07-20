@@ -175,26 +175,23 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
   }
   const users = await User.find(query).select('-password').populate('cityId', 'name');
 
-  let nearBy = [];
-  let giud = [];
+  let nearbies = null;
+  let guids = null;
 
   for (const user of users) {
     const cityId = user.cityId;
 
-    const nearbies = await NearBy.find({cityId:cityId});
+     nearbies = await NearBy.find({cityId:cityId});
 
-    const guids = await Guid.find({cityId:cityId});
+     guids = await Guid.find({cityId:cityId});
 
-    nearBy.push(nearbies); 
-
-    giud.push(guids);
 
 }
 
 const data = {
   'hotel': users,
-  'nearBy': nearBy,
-  'guid': giud
+  'nearBy': nearbies,
+  'guid': guids
 }
  
 
