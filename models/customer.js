@@ -90,7 +90,7 @@ const customers = new mongoose.Schema(
             ref: 'User',
             required: false,
         }],
-        recentlyViewedEscorts: [
+        recentlyViewedHotels: [
             {
               type: mongoose.Schema.Types.ObjectId,
               ref: 'User',
