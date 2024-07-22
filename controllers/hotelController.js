@@ -6,6 +6,7 @@ const Guid = require("../models/guid");
 const City = require("../models/city");
 const bcrypt = require('bcryptjs');
 const {catchError} = require('../middlewares/CatchError');
+const HotelsRooms = require('../models/hotelsRooms');
 
 exports.createHotel = catchError(async(req, res) =>{
     const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice } = req.body;
@@ -31,6 +32,17 @@ exports.createHotel = catchError(async(req, res) =>{
         newHotelName = 'Dham-1';
     }
 
+    let parsedLocation;
+    if (typeof location === 'string') {
+      try {
+        parsedLocation = JSON.parse(location);
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid location format' });
+      }
+    } else {
+      parsedLocation = location;
+    }
+
     const newHotel = new User({
       name,
       email,
@@ -44,7 +56,7 @@ exports.createHotel = catchError(async(req, res) =>{
       hotelName: newHotelName,
       price,
       offerPrice,
-      location,
+      location:parsedLocation,
       files
     });
 
@@ -77,18 +89,29 @@ exports.updateHotel = catchError(async(req, res) =>{
       return res.status(401).json({message:"Entered Email or Mobile Already Exist FOr Other User!"});
   }
 
-  hotel.name = name;
-  hotel.email = email;
-  hotel.mobile = mobile;
-  hotel.countryId = countryId;
-  hotel.stateId = stateId;
-  hotel.cityId = cityId;
-  hotel.pincode = pincode;
-  hotel.address = address;
-  hotel.files = files;
-  hotel.location = location;
-  hotel.price = price; 
-  hotel.offerPrice = offerPrice;
+  let parsedLocation;
+  if (typeof location === 'string') {
+    try {
+      parsedLocation = JSON.parse(location);
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid location format' });
+    }
+  } else {
+    parsedLocation = location;
+  }
+
+  hotel.name = name??hotel.name;
+  hotel.email = email??hotel.email;
+  hotel.mobile = mobile??hotel.mobile;
+  hotel.countryId = countryId??hotel.countryId;
+  hotel.stateId = stateId??hotel.stateId;
+  hotel.cityId = cityId??hotel.cityId;
+  hotel.pincode = pincode??hotel.pincode;
+  hotel.address = address??hotel.address;
+  hotel.files = files??hotel.files;
+  hotel.location = parsedLocation??hotel.location;
+  hotel.price = price??hotel.price; 
+  hotel.offerPrice = offerPrice??hotel.offerPrice;
   hotel.save();
 
   res.status(201).json({message:"Hotel Updated Successfully"});
@@ -109,6 +132,7 @@ exports.getMyHotels = catchError(async(req, res) => {
           { name: searchRegex },
           { mobile: searchRegex },
           { email: searchRegex },
+          { hotelName: searchRegex },
         ],
       };
     }
@@ -222,9 +246,66 @@ exports.deleteHotel = catchError(async(req, res) =>{
   const deleteHotel = await User.findByIdAndDelete(req.params.id);
 
   return res.status(200).json({message:"Record Deleted Successfully!"});
+});
+
+
+
+
+exports.gethotelDetails = catchError(async(req, res) =>{
+  const hotel = await User.findById(req.params.id);
+  const hotelRooms = await HotelsRooms.find({userId:req.params.id});
+  const cityId = hotel.cityId;
+  const nearbies = await NearBy.find({cityId:cityId});
+
+  const hotelCoords = hotel.location.coordinates;
+
+  const nearbiesWithDistances = nearbies.map(nearby => {
+      const nearbyCoords = nearby.location.coordinates;
+      if (!Array.isArray(nearbyCoords) || nearbyCoords.length !== 2) {
+          return {
+              ...nearby.toObject(),
+              distance: 'unknown'
+          };
+      }
+
+      const distance = calculateDistance(hotelCoords, nearbyCoords).toFixed(2);
+      return {
+          ...nearby.toObject(),
+          distance:  `${distance} km`
+      };
+  });
+
+  return res.status(200).json({
+    hotel,
+    hotelRooms,
+    nearbiesWithDistances
+  });
+  
 })
+
+
+
 
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
+}
+
+function calculateDistance(coords1, coords2) {
+  const [lat1, lon1] = coords1;
+  const [lat2, lon2] = coords2;
+
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+      0.5 - Math.cos(dLat) / 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      (1 - Math.cos(dLon)) / 2;
+
+  return R * 2 * Math.asin(Math.sqrt(a));
 }
 
