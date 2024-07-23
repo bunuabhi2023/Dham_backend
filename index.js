@@ -19,6 +19,8 @@ app.use(
             'http://localhost:5174',
             "http://localhost:3000",
             "https://dhaam.netlify.app",
+            "https://dham-super-admin.netlify.app",
+            "http://192.168.1.34:3000"
           ],
           credentials: true,
     })
