@@ -19,6 +19,7 @@ const amenitiesController = require('../controllers/amenitiesController');
 const roomCategoryController = require('../controllers/roomCategoryController');
 const nearbyController = require('../controllers/nearbyController');
 const guidController = require('../controllers/guidController');
+const blogController = require('../controllers/blogController');
 
 
 
@@ -175,6 +176,13 @@ router.put("/update-guid/:id", imageSingleUpload, auth, isAdmin, guidController.
 router.get("/get-guid-by-city/:cityId", guidController.getGuidByCity);
 router.get("/get-all-guid",auth, isAdmin, guidController.getAllGuids);
 router.delete("/delete-guid/:id", auth, isAdmin, guidController.deleteGuid);
+
+//Blog Routes//
+router.post("/create-blog", imageMultiUpload, auth, isAdmin, blogController.createBlog);
+router.get("/get-blog-by-admin",  auth, isAdmin, blogController.getBlogByAdmin);
+router.get("/get-blog-by-id/:id",  auth, isAdmin, blogController.getBlogById);
+router.put("/update-blog/:id", imageMultiUpload, auth, isAdmin, blogController.updateBlog);
+router.put("/publish-blog/:id",  auth, isAdmin, blogController.publishBlog);
 
 
 module.exports = router;
