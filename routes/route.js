@@ -20,6 +20,7 @@ const roomCategoryController = require('../controllers/roomCategoryController');
 const nearbyController = require('../controllers/nearbyController');
 const guidController = require('../controllers/guidController');
 const blogController = require('../controllers/blogController');
+const homeController = require('../controllers/homeController');
 
 
 
@@ -62,6 +63,11 @@ router.post("/forget-customer-password",  customerController.forgotCustomerPassw
 router.post("/reset-customer-password",  customerController.resetCustomerPassword);
 router.post("/change-customer-password", customerAuth, customerController.updateCustomerPassword);
 router.delete("/delete-customer/:id",  auth, isAdmin, customerController.deleteCustomer);
+
+//Home Routes//
+
+router.get("/top-hotels", homeController.TopHotels);
+router.get("/top-nearby", homeController.TopNearBy);
 
 //Booking Routes//
 router.post("/book-escort", customerAuth,bookingController.bookEscort);
