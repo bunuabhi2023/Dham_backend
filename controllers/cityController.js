@@ -1,4 +1,4 @@
-const State = require('../models/state');
+const User = require('../models/user');
 const City = require('../models/city');
 const {catchError} = require('../middlewares/CatchError');
 
@@ -19,7 +19,16 @@ exports.createCity = catchError(async(req, res) =>{
 
 exports.getAllCity = catchError(async(req, res)=>{
     const cities = await City.find().populate('stateId', 'name').exec();
-    return res.status(200).json({cities:cities});
+
+    const updatedCities = await Promise.all(cities.map(async (city) => {
+        const userCount = await User.countDocuments({ cityId: city._id }).exec();
+      
+        const cityWithUserCount = city.toObject();
+        cityWithUserCount.propertyCount = userCount;
+        return cityWithUserCount;
+    }));
+
+    return res.status(200).json({ cities: updatedCities });
 });
 
 exports.getByState = catchError(async(req, res)=>{

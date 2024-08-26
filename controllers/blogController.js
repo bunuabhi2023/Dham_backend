@@ -77,3 +77,9 @@ exports.publishBlog = catchError(async(req, res) =>{
 
     return res.status(201).json({message:"Blog Published successfully!"})
 });
+
+exports.getAllBlogs = catchError(async(req, res) =>{
+    const blogs = await Blog.find({status:"published"}).populate('cityId', 'name').exec();
+    return res.status(200).json({blogs});
+
+});
