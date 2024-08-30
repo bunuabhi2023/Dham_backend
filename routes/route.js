@@ -21,6 +21,7 @@ const nearbyController = require('../controllers/nearbyController');
 const guidController = require('../controllers/guidController');
 const blogController = require('../controllers/blogController');
 const homeController = require('../controllers/homeController');
+const propertyTypeController =  require('../controllers/propertyTypeController');
 
 
 
@@ -152,6 +153,7 @@ router.get("/get-amenities", amenitiesController.getAmenities);
 router.get("/get-amenity-by-id/:id", amenitiesController.getAmenitiesById);
 router.put("/update-amenity/:id", imageSingleUpload, auth, isAdmin, amenitiesController.updateAmenity);
 router.delete("/delete-amenity/:id", auth, isAdmin, amenitiesController.deleteAmenity);
+router.get("/get-all-amenities", amenitiesController.getAllAmenities);
 
 
 //Hotel Management Routes//
@@ -191,6 +193,11 @@ router.get("/get-blog-by-id/:id",  auth, isAdmin, blogController.getBlogById);
 router.put("/update-blog/:id", imageMultiUpload, auth, isAdmin, blogController.updateBlog);
 router.put("/publish-blog/:id",  auth, isAdmin, blogController.publishBlog);
 router.get("/get-blogs",  blogController.getAllBlogs);
+
+
+//Property Type//
+router.post("/create-property-type", auth, isAdmin, propertyTypeController.createPropertyType);
+router.get("/get-all-property-type", propertyTypeController.getAllPropertyType);
 
 
 module.exports = router;

@@ -9,7 +9,7 @@ const {catchError} = require('../middlewares/CatchError');
 const HotelsRooms = require('../models/hotelsRooms');
 
 exports.createHotel = catchError(async(req, res) =>{
-    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice } = req.body;
+    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId } = req.body;
     const files = req.s3FileUrls;
     const existingUser = await User.findOne({
         $or: [{ email }, { mobile }],
@@ -56,6 +56,8 @@ exports.createHotel = catchError(async(req, res) =>{
       hotelName: newHotelName,
       price,
       offerPrice,
+      amenitiesId,
+      propertyTypeId,
       location:parsedLocation,
       files
     });
@@ -75,7 +77,7 @@ exports.updateHotel = catchError(async(req, res) =>{
     res.status(404).json({message:"Hotel Not Found."});
   }
 
-  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location, price, offerPrice } = req.body;
+  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId } = req.body;
   const files = req.s3FileUrls;
    
   const duplicateHotel = await User.findOne({
@@ -112,6 +114,8 @@ exports.updateHotel = catchError(async(req, res) =>{
   hotel.location = parsedLocation??hotel.location;
   hotel.price = price??hotel.price; 
   hotel.offerPrice = offerPrice??hotel.offerPrice;
+  hotel.amenitiesId = amenitiesId??hotel.amenitiesId;
+  hotel.propertyTypeId = propertyTypeId??hotel.propertyTypeId;
   hotel.save();
 
   res.status(201).json({message:"Hotel Updated Successfully"});
@@ -152,6 +156,7 @@ exports.getMyHotels = catchError(async(req, res) => {
       .populate('countryId', 'name')
       .populate('stateId', 'name')
       .populate('cityId', 'name')
+      .populate('amenitiesId')
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .lean();
@@ -194,7 +199,7 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
   if (req.query.cityId) {
       query.cityId = req.query.cityId; 
   }
-  const users = await User.find(query).select('-password').populate('cityId', 'name');
+  const users = await User.find(query).select('-password').populate('cityId', 'name').populate('amenitiesId');
 
   let nearbies = null;
   let guids = null;
@@ -311,17 +316,32 @@ function calculateDistance(coords1, coords2) {
 
 
 exports.getHotelByCity = catchError(async(req, res) =>{
-  const {cityId} = req.params;
+  const { cityId } = req.params;
+  const { amenities, priceRange, min_price, max_price } = req.query;
 
-  const hotels = await User.find({cityId:cityId}).exec();
+  let query = { cityId: cityId };
+
+  if (amenities) {
+    const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
+    query.amenitiesId = { $in: amenitiesArray };
+  }
+
+  if (req.query.properTypeId) {
+      query.properTypeId = req.query.properTypeId; 
+  }
+
+  if (priceRange) {
+    const [minPrice, maxPrice] = priceRange.split(" to ").map(Number);
+    query.offerPrice = { $gte: minPrice, $lte: maxPrice };
+  } else if (min_price !== undefined && max_price !== undefined) {
+    query.offerPrice = { $gte: Number(min_price), $lte: Number(max_price) };
+  }
+
+  const hotels = await User.find(query).exec();
 
   const updatedHotels = hotels.map(hotel => {
       const hotelObj = hotel.toObject();
-      
-      // Add an `id` field with the value of `_id`
       hotelObj.id = hotelObj._id;
-      
-      // Remove the `_id` field
       delete hotelObj._id;
       
       return hotelObj;

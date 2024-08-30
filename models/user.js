@@ -117,6 +117,11 @@ const users = new mongoose.Schema(
             ref: 'City',
             required: false,
         },
+        propertyTypeId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'PropertyType',
+            required: false,
+        },
         pincode:{
             type:String,
             required:false,

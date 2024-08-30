@@ -70,5 +70,18 @@ exports.updateAmenity = catchError(async(req, res) =>{
 exports.deleteAmenity = catchError(async(req, res) => {
     const amenity = await Amenity.findByIdAndDelete(req.params.id);
     return res.status(200).json({message:"Record Deleted Successfully!"});
-})
+});
+
+exports.getAllAmenities = catchError(async(req, res)=>{
+    const amenities = await Amenity.find();
+
+    const updatedAmenities = amenities.map(amenity => {
+        const amenityObj = amenity.toObject();
+        amenityObj.id = amenityObj._id;
+        delete amenityObj._id;
+        
+        return amenityObj;
+    });
+    return res.status(200).json({amenities:updatedAmenities});
+});
 
