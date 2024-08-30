@@ -25,6 +25,8 @@ exports.getAllCity = catchError(async(req, res)=>{
       
         const cityWithUserCount = city.toObject();
         cityWithUserCount.propertyCount = userCount;
+        cityWithUserCount.id = cityWithUserCount._id;
+        delete cityWithUserCount._id;
         return cityWithUserCount;
     }));
 

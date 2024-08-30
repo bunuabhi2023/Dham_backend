@@ -315,6 +315,18 @@ exports.getHotelByCity = catchError(async(req, res) =>{
 
   const hotels = await User.find({cityId:cityId}).exec();
 
+  const updatedHotels = hotels.map(hotel => {
+      const hotelObj = hotel.toObject();
+      
+      // Add an `id` field with the value of `_id`
+      hotelObj.id = hotelObj._id;
+      
+      // Remove the `_id` field
+      delete hotelObj._id;
+      
+      return hotelObj;
+  });
+
   const count0To1500 = await User.countDocuments({
     cityId: cityId,
     offerPrice: { $gt: 0, $lte: 1500 }
@@ -348,7 +360,7 @@ exports.getHotelByCity = catchError(async(req, res) =>{
 
   // Construct the response
   return res.status(200).json({
-    hotels: hotels,
+    hotels: updatedHotels,
     priceRangeCounts: {
       "0 to 1500": count0To1500,
       "1500 to 3000": count1500To3000,
