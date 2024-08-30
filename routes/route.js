@@ -163,6 +163,7 @@ router.get("/get-all-hotels", hotelController.getAllHotels);
 router.get("/get-hotel-by-id/:id", hotelController.getHotelById);
 router.delete("/delete-hotel/:id", auth, isAdmin, hotelController.deleteHotel);
 router.get("/get-hotel-details/:id", hotelController.gethotelDetails);
+router.get("/get-hotel-by-city/:cityId", hotelController.getHotelByCity);
 
 //Hotel Rooms Management//
 router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);

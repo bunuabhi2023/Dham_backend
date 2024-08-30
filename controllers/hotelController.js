@@ -200,24 +200,24 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
   let guids = null;
 
   for (const user of users) {
-    const cityId = user.cityId;
+      const cityId = user.cityId;
 
-     nearbies = await NearBy.find({cityId:cityId});
+      nearbies = await NearBy.find({cityId:cityId});
 
-     guids = await Guid.find({cityId:cityId});
-
-
-}
-
-const data = {
-  'hotel': users,
-  'nearBy': nearbies,
-  'guid': guids
-}
- 
+      guids = await Guid.find({cityId:cityId});
 
 
- return res.status(200).json(data);
+  }
+
+  const data = {
+    'hotel': users,
+    'nearBy': nearbies,
+    'guid': guids
+  }
+  
+
+
+  return res.status(200).json(data);
 
 });
 
@@ -308,4 +308,56 @@ function calculateDistance(coords1, coords2) {
 
   return R * 2 * Math.asin(Math.sqrt(a));
 }
+
+
+exports.getHotelByCity = catchError(async(req, res) =>{
+  const {cityId} = req.params;
+
+  const hotels = await User.find({cityId:cityId}).exec();
+
+  const count0To1500 = await User.countDocuments({
+    cityId: cityId,
+    offerPrice: { $gt: 0, $lte: 1500 }
+  });
+
+  // Count for 1500 to 3000
+  const count1500To3000 = await User.countDocuments({
+    cityId: cityId,
+    offerPrice: { $gt: 1500, $lte: 3000 }
+  });
+
+  const count3000To5500 = await User.countDocuments({
+    cityId: cityId,
+    offerPrice: { $gt: 3000, $lte: 5500 }
+  });
+
+  const count5500To7500 = await User.countDocuments({
+    cityId: cityId,
+    offerPrice: { $gt: 5500, $lte: 7500 }
+  });
+
+  const count7500To11500 = await User.countDocuments({
+    cityId: cityId,
+    offerPrice: { $gt: 7500, $lte: 11500 }
+  });
+
+  const count11500To15000 = await User.countDocuments({
+    cityId: cityId,
+    offerPrice: { $gt: 11500, $lte: 15000 }
+  });
+
+  // Construct the response
+  return res.status(200).json({
+    hotels: hotels,
+    priceRangeCounts: {
+      "0 to 1500": count0To1500,
+      "1500 to 3000": count1500To3000,
+      "3000 to 5500": count3000To5500,
+      "5500 to 7500": count5500To7500,
+      "7500 to 11500": count7500To11500,
+      "11500 to 15000": count11500To15000
+    }
+  });
+
+});
 

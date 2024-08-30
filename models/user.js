@@ -135,6 +135,11 @@ const users = new mongoose.Schema(
             type:Number,
             required:true
         },
+        amenitiesId:[{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Amenity',
+            required:false,
+        }],
         createdAt:{
             type:Date,
             required:true,
