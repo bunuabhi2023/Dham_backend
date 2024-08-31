@@ -381,7 +381,7 @@ exports.getHotelByCity = catchError(async(req, res) =>{
   // Construct the response
   return res.status(200).json({
     hotels: updatedHotels,
-    count : updatedHotels.count(),
+    count : updatedHotels.length,
     priceRangeCounts: {
       "0 to 1500": count0To1500,
       "1500 to 3000": count1500To3000,
