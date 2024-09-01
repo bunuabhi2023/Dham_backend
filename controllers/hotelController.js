@@ -11,6 +11,8 @@ const HotelsRooms = require('../models/hotelsRooms');
 exports.createHotel = catchError(async(req, res) =>{
     const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId } = req.body;
     const files = req.s3FileUrls;
+
+
     const existingUser = await User.findOne({
         $or: [{ email }, { mobile }],
     });
@@ -257,12 +259,20 @@ exports.deleteHotel = catchError(async(req, res) =>{
 
 
 exports.gethotelDetails = catchError(async(req, res) =>{
-  const hotel = await User.findById(req.params.id);
-  const hotelRooms = await HotelsRooms.find({userId:req.params.id});
+  const hotel = await User.findById(req.params.id).populate('amenitiesId').lean().exec();
+  const hotelRooms = await HotelsRooms.find({userId:req.params.id}).populate('roomCategoryId', 'name').populate('amenitiesId').lean().exec();
   const cityId = hotel.cityId;
   const nearbies = await NearBy.find({cityId:cityId});
 
+  hotel.id = hotel._id;
+  delete hotel._id;
   const hotelCoords = hotel.location.coordinates;
+
+  const updatedHotelRooms = hotelRooms.map(room => {
+      room.id = room._id;
+      delete room._id;
+      return room;
+  });
 
   const nearbiesWithDistances = nearbies.map(nearby => {
       const nearbyCoords = nearby.location.coordinates;
@@ -282,7 +292,7 @@ exports.gethotelDetails = catchError(async(req, res) =>{
 
   return res.status(200).json({
     hotel,
-    hotelRooms,
+    hotelRooms:updatedHotelRooms,
     nearbiesWithDistances
   });
   
