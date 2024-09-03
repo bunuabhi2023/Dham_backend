@@ -94,5 +94,13 @@ exports.getRecentBlogs = catchError(async(req, res) => {
                                   .populate('cityId', 'name')  
                                   .exec();
 
-    return res.status(200).json({recentBlogs});
+    const updatedBlogs = recentBlogs.map(blog => {
+        const blogObj = blog.toObject();
+        blogObj.id = blogObj._id;
+        delete blogObj._id;
+        
+        return blogObj;
+    });
+
+    return res.status(200).json({updatedBlogs});
 });
