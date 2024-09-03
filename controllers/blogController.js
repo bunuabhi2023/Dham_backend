@@ -2,7 +2,7 @@ const Blog = require('../models/blog');
 const {catchError} = require('../middlewares/CatchError');
 
 exports.createBlog = catchError(async(req, res) =>{
-    const {title, shotNote, content, cityId, tags} = req.body;
+    const {title, shortNote, content, cityId, tags} = req.body;
     const authenticatedUser = req.user;
 
     const userId = authenticatedUser._id;
@@ -11,7 +11,7 @@ exports.createBlog = catchError(async(req, res) =>{
 
     const newBlog = new Blog({
         title,
-        shotNote,
+        shortNote,
         content,
         cityId,
         createdBy:userId,
@@ -51,7 +51,7 @@ exports.getBlogById = catchError(async(req, res) =>{
 });
 
 exports.updateBlog = catchError(async(req, res) =>{
-    const {title, shotNote, content, cityId, tags} = req.body;
+    const {title, shortNote, content, cityId, tags} = req.body;
 
     const files = req.s3FileUrls;
 
@@ -59,7 +59,7 @@ exports.updateBlog = catchError(async(req, res) =>{
 
     blog.title = title;
     blog.cityId = cityId;
-    blog.shotNote = shotNote;
+    blog.shortNote = shortNote;
     blog.content = content;
     blog.tags = tags;
     blog.files = files;

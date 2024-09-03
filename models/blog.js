@@ -7,9 +7,9 @@ const blogs = new mongoose.Schema(
             required:true,
             maxLength:255,
         },
-        shotNote:{
+        shortNote:{
             type:String,
-            required:true,
+            required:false,
             maxLength:255,
         },
         content:{
