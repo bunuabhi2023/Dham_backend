@@ -2,7 +2,7 @@ const Blog = require('../models/blog');
 const {catchError} = require('../middlewares/CatchError');
 
 exports.createBlog = catchError(async(req, res) =>{
-    const {title, content, cityId, tags} = req.body;
+    const {title, shotNote, content, cityId, tags} = req.body;
     const authenticatedUser = req.user;
 
     const userId = authenticatedUser._id;
@@ -11,6 +11,7 @@ exports.createBlog = catchError(async(req, res) =>{
 
     const newBlog = new Blog({
         title,
+        shotNote,
         content,
         cityId,
         createdBy:userId,
@@ -50,7 +51,7 @@ exports.getBlogById = catchError(async(req, res) =>{
 });
 
 exports.updateBlog = catchError(async(req, res) =>{
-    const {title, content, cityId, tags} = req.body;
+    const {title, shotNote, content, cityId, tags} = req.body;
 
     const files = req.s3FileUrls;
 
@@ -58,6 +59,7 @@ exports.updateBlog = catchError(async(req, res) =>{
 
     blog.title = title;
     blog.cityId = cityId;
+    blog.shotNote = shotNote;
     blog.content = content;
     blog.tags = tags;
     blog.files = files;
@@ -82,4 +84,15 @@ exports.getAllBlogs = catchError(async(req, res) =>{
     const blogs = await Blog.find({status:"published"}).populate('cityId', 'name').exec();
     return res.status(200).json({blogs});
 
+});
+
+
+exports.getRecentBlogs = catchError(async(req, res) => {
+    const recentBlogs = await Blog.find({status: "published"})
+                                  .sort({createdAt: -1})
+                                  .limit(4) 
+                                  .populate('cityId', 'name')  
+                                  .exec();
+
+    return res.status(200).json({recentBlogs});
 });

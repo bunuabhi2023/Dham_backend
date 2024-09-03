@@ -193,6 +193,7 @@ router.get("/get-blog-by-id/:id",  auth, isAdmin, blogController.getBlogById);
 router.put("/update-blog/:id", imageMultiUpload, auth, isAdmin, blogController.updateBlog);
 router.put("/publish-blog/:id",  auth, isAdmin, blogController.publishBlog);
 router.get("/get-blogs",  blogController.getAllBlogs);
+router.get("/recent-blogs",  blogController.getRecentBlogs);
 
 
 //Property Type//

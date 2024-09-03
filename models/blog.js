@@ -7,10 +7,14 @@ const blogs = new mongoose.Schema(
             required:true,
             maxLength:255,
         },
-        content:{
+        shotNote:{
             type:String,
             required:true,
             maxLength:255,
+        },
+        content:{
+            type:String,
+            required:true,
         },
         status: {
             type:String,
