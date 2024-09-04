@@ -229,7 +229,7 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
 });
 
 exports.getHotelById = catchError(async(req, res) =>{
-  const hotel = await User.findById(req.params.id);
+  const hotel = await User.findById(req.params.id).populate('cityId', 'name').exec();
 
   return res.status(200).json({data:hotel});
 })
