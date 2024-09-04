@@ -158,6 +158,7 @@ exports.getMyHotels = catchError(async(req, res) => {
       .populate('countryId', 'name')
       .populate('stateId', 'name')
       .populate('cityId', 'name')
+      .populate('propertyTypeId', 'name')
       .populate('amenitiesId')
       .skip((page - 1) * pageSize)
       .limit(pageSize)
