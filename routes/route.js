@@ -22,6 +22,7 @@ const guidController = require('../controllers/guidController');
 const blogController = require('../controllers/blogController');
 const homeController = require('../controllers/homeController');
 const propertyTypeController =  require('../controllers/propertyTypeController');
+const tourEventController = require('../controllers/tourEventController');
 
 
 
@@ -199,6 +200,10 @@ router.get("/recent-blogs",  blogController.getRecentBlogs);
 //Property Type//
 router.post("/create-property-type", auth, isAdmin, propertyTypeController.createPropertyType);
 router.get("/get-all-property-type", propertyTypeController.getAllPropertyType);
+
+
+//Tour And Event Routes//
+router.post("/create-tour-event",imageMultiUpload, auth, isAdmin, tourEventController.createTourEvent);
 
 
 module.exports = router;
