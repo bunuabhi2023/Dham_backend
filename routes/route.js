@@ -204,6 +204,11 @@ router.get("/get-all-property-type", propertyTypeController.getAllPropertyType);
 
 //Tour And Event Routes//
 router.post("/create-tour-event",imageMultiUpload, auth, isAdmin, tourEventController.createTourEvent);
+router.get("/get-current-city-tour", tourEventController.currentCityTour);
+router.get("/upcoming-tours-events", tourEventController.upComingTourEvent);
+router.get("/top-destinations", tourEventController.topDestination);
+router.get("/event-tour-by-id/:id", tourEventController.getTourAndEventById);
+router.get("/all-events-tours",auth, isAdmin, tourEventController.getAllEventsAndTours);
 
 
 module.exports = router;
