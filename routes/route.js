@@ -195,6 +195,7 @@ router.put("/update-blog/:id", imageMultiUpload, auth, isAdmin, blogController.u
 router.put("/publish-blog/:id",  auth, isAdmin, blogController.publishBlog);
 router.get("/get-blogs",  blogController.getAllBlogs);
 router.get("/recent-blogs",  blogController.getRecentBlogs);
+router.delete("/delete-blog/:id",  auth, isAdmin, blogController.deleteBlog);
 
 
 //Property Type//
@@ -204,11 +205,12 @@ router.get("/get-all-property-type", propertyTypeController.getAllPropertyType);
 
 //Tour And Event Routes//
 router.post("/create-tour-event",imageMultiUpload, auth, isAdmin, tourEventController.createTourEvent);
+router.put("/update-tour-event/:id",imageMultiUpload, auth, isAdmin, tourEventController.updateTourEvent);
 router.get("/get-current-city-tour", tourEventController.currentCityTour);
 router.get("/upcoming-tours-events", tourEventController.upComingTourEvent);
 router.get("/top-destinations", tourEventController.topDestination);
 router.get("/event-tour-by-id/:id", tourEventController.getTourAndEventById);
-router.get("/all-events-tours",auth, isAdmin, tourEventController.getAllEventsAndTours);
+router.delete("/delete-event-tour/:id",auth, isAdmin, tourEventController.deleteTourEvent);
 
 
 module.exports = router;

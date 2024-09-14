@@ -54,6 +54,66 @@ exports.createTourEvent = catchError(async (req, res) => {
 
 });
 
+exports.updateTourEvent = catchError(async (req, res) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    start_from,
+    end_at,
+    departure_date,
+    departure_time,
+    cost,
+    duration,
+    plans,
+    type,
+    departure_from,
+    cityId,
+  } = req.body;
+
+  const authenticatedUser = req.user;
+  const userId = authenticatedUser._id;
+
+  const files = req.s3FileUrls;
+
+  let parsedPlans;
+  try {
+    parsedPlans = typeof plans === 'string' ? JSON.parse(plans) : plans;
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid plans format' });
+  }
+
+  const updatedFields = {
+    title,
+    description,
+    start_from,
+    end_at,
+    departure_date,
+    departure_time,
+    cost,
+    duration,
+    plans: parsedPlans,
+    type,
+    departure_from,
+    cityId,
+    createdBy: userId,
+    files,
+  };
+
+  try {
+    const updatedTourEvent = await TourEvent.findByIdAndUpdate(id, updatedFields, { new: true });
+
+    if (!updatedTourEvent) {
+      return res.status(404).json({ message: 'Tour/Event not found' });
+    }
+
+    return res.status(200).json({ message: 'Record Updated Successfully', data: updatedTourEvent });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error updating Tour/Event', error });
+  }
+});
+
+
 exports.currentCityTour = catchError(async(req, res) =>{
   const currentDate = new Date();
 
@@ -157,5 +217,12 @@ exports.getTourAndEventById = catchError(async(req, res) =>{
 
 
   return res.status(200).json({tourAndEvent});
-})
+});
+
+exports.deleteTourEvent = catchError(async(req, res) =>{
+  const deleteTourEvent = await TourEvent.findByIdAndDelete(req.params.id);
+
+  return res.status(200).json({message:"Record Deleted Successfully!"});
+
+});
 

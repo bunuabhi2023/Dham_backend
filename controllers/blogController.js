@@ -104,3 +104,10 @@ exports.getRecentBlogs = catchError(async(req, res) => {
 
     return res.status(200).json({updatedBlogs});
 });
+
+exports.deleteBlog = catchError(async(req, res) =>{
+    const deleteBlog = await Blog.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({message:"Record Deleted Successfully!"});
+
+});
