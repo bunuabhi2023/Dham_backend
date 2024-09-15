@@ -73,6 +73,7 @@ router.get("/top-hotels", homeController.TopHotels);
 router.get("/top-nearby", homeController.TopNearBy);
 
 //Booking Routes//
+router.post("/book-property", bookingController.createBooking);
 
 
 
