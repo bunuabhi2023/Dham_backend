@@ -32,7 +32,7 @@
     "razorpay": "^2.9.2",
     "serverless-http": "^3.2.0",
     "swagger-ui-express": "^5.0.0",
-    "twilio": "^5.2.2",
+    "twilio": "^5.3.0",
     "yamljs": "^0.3.0"
   }
 }

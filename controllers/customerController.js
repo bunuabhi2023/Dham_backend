@@ -2,9 +2,10 @@ const Customer = require ('../models/customer');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { options } = require("../routes/route");
-require("dotenv").config();
+require('dotenv').config();
+const twilio = require('twilio');
 const nodemailer = require('nodemailer');
+const { catchError } = require("../middlewares/CatchError");
 
 const { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } = require('firebase/firestore');
 const { initializeApp } = require('firebase/app');
@@ -24,32 +25,38 @@ const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 const auth = getAuth(app);
 
-exports.signup = async(req,res) =>{
-    try {
-        const { name, email, mobile, password, username } = req.body;
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+
+
+
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString(); 
+}
+
+exports.signup = catchError(async (req, res) => {
+ 
+        const { firstname, lastname, mobile} = req.body;
     
-        // Check if the email or mobile already exists in the database
         const existingCustomer = await Customer.findOne({
-          $or: [{ email }, { mobile }, { username }],
+         mobile,
         });
     
         if (existingCustomer) {
-          return res.status(400).json({ message: 'Email or mobile or Username already exists' });
+          return res.status(400).json({ message: 'User with Entered Mobile Number is already exists' });
         }
-    
-        // Hash the password before saving it to the database
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
-        // Create the new customer object with the hashed password
+
+        const otp = generateOTP();
+
         const newCustomer = new Customer({
-          name,
-          email,
+          firstname,
+          lastname,
           mobile,
-          password: hashedPassword,
-          username,
+          password:null,
           email_otp: null,
-          mobile_otp: null,
+          mobile_otp: otp,
           dob: null,
           age:null,
           latitude: null,
@@ -60,108 +67,131 @@ exports.signup = async(req,res) =>{
         });
     
         // Save the new customer to the database
-        await newCustomer.save();
+       const savedCustomer =  await newCustomer.save();
 
-        createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        console.log('User UID:', user.uid);
+       if(savedCustomer){
+          const accountSid = process.env.TWILIO_ACCOUNT_SID;
+          const authToken = process.env.TWILIO_AUTH_TOKEN;
+          const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+      
+          // Create a Twilio client
+          const twilio = require('twilio')(accountSid, authToken);
+          
+          // Send OTP message
+          const message = await twilio.messages.create({
+              body: `Your OTP code is: ${otp}`,
+              from: twilioPhoneNumber,
+              to: mobile
+          });
+      
+          if (message) {
+              console.log('OTP sent successfully:', message.sid);
+          } else {
+              console.error('Failed to send OTP.');
+          }
+       }
 
-        const newFirestoreUser = {
-          uid: user.uid,
-          email: user.email,
-          name: newCustomer.name,
-          image: '',
-          isOnline: true,
-          lastActive: new Date(),
-          chatParticipants: [],
-        };
-
-        const userDocRef = doc(firestore, 'users', user.uid);
-        await setDoc(userDocRef, newFirestoreUser);
-
-        console.log('Document successfully written to Firestore');
-      })
-      .catch((error) => {
-        console.error('Error during Firebase user creation:', error);
-        return res.status(500).json({ message: 'Error during Firebase user creation' });
-      });
     
-        return res.status(201).json({ message: 'Customer created successfully' });
-      } catch (error) {
-        console.error('Error during customer signup:', error);
-        return res.status(500).json({ message: 'Something went wrong' });
-      }
-}
+        return res.status(201).json({ message: 'Customer created successfully! Please verify your number with otp sent to your mobile' });
+});
+
+
+exports.verifyOtp = catchError(async(req, res)=>{
+  const {otp, mobile} = req.body;
+  //validation on email and password
+  if(!otp || !mobile) {
+      return res.status(400).json({
+          success:false,
+          message:'Invalid Inputs!',
+      });
+  }
+  let customer = await Customer.findOne({mobile});
+  if(customer.mobile_otp != otp){
+    return res.status(401).json({
+      success:false,
+      message: "Invalid Otp"
+    });
+  }
+
+  const payload = {
+      mobile:customer.mobile,
+      _id:customer._id
+  };
+  let token =  jwt.sign(payload, 
+    process.env.JWT_SECRET,
+    {
+        expiresIn:"365d",
+    });
+
+  customer.mobile_otp = null;
+  await customer.save();
+  customer = customer.toObject();
+  customer.token = token;
+
+  const options = {
+  expires: new Date( Date.now() + 15 * 24 * 60 * 60 * 1000),
+  httpOnly:true,
+  sameSite: 'none',
+  secure: true,
+  }
+
+
+  res.cookie("token", token, options).status(200).json({
+    success:true,
+    token,
+    customer,
+    message:'customer Logged in successfully',
+  });
+})
 
 exports.login = async (req,res) => {
-    try {
+  try {
 
-        //data fetch
-        const {email, password, token} = req.body;
-        //validation on email and password
-        if(!email || !password) {
-            return res.status(400).json({
-                success:false,
-                message:'PLease fill all the details carefully',
-            });
-        }
+      //data fetch
+      const {mobile} = req.body;
+      //validation on email and password
+      if(!mobile) {
+          return res.status(400).json({
+              success:false,
+              message:'PLease enter the mobile number',
+          });
+      }
 
-        //check for registered user
-        let customer = await Customer.findOne({email});
-        //if not a registered user
-        if(!customer) {
-            return res.status(401).json({
-                success:false,
-                message:'customer is not registered',
-            });
-        }
-        console.log(customer._id)
-        if(token){
-          customer.deviceId = token;
-          customer.save();
-          }
-        const payload = {
-            email:customer.email,
-            _id:customer._id,
-        };
-        //verify password & generate a JWT token
-        // if(await bcrypt.compare(password,customer.password) ) {
-            //password match
+      //check for registered user
+      let customer = await Customer.findOne({mobile});
+      //if not a registered user
+      if(!customer) {
+          return res.status(401).json({
+              success:false,
+              message:'customer is not registered',
+          });
+      }
 
-            signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-              // Signed in 
-              const user = userCredential.user;
-              let token =  jwt.sign(payload, 
-                process.env.JWT_SECRET,
-                {
-                    expiresIn:"15d",
-                });                          
+      const otp = generateOTP();
+      customer.mobile_otp = otp;
+      await customer.save();
 
-                    customer = customer.toObject();
-                    customer.token = token;
-                    customer.password = undefined;
+      const accountSid = process.env.TWILIO_ACCOUNT_SID;
+      const authToken = process.env.TWILIO_AUTH_TOKEN;
+      const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+  
+      // Create a Twilio client
+      const twilio = require('twilio')(accountSid, authToken);
+      
+      // Send OTP message
+      const message = await twilio.messages.create({
+          body: `Your OTP code is: ${otp}`,
+          from: twilioPhoneNumber,
+          to: mobile
+      });
+  
+      if (message) {
+          console.log('OTP sent successfully:', message.sid);
+      } else {
+          console.error('Failed to send OTP.');
+      }
 
-                    const options = {
-                    expires: new Date( Date.now() + 15 * 24 * 60 * 60 * 1000),
-                    httpOnly:true,
-                    sameSite: 'none',
-                    secure: true,
-                    }
-
-                    res.cookie("token", token, options).status(200).json({
-                    success:true,
-                    token,
-                    customer,
-                    message:'customer Logged in successfully',
-                });
-              // ...
-            })
-            .catch((error) => {
-              const errorCode = error.code;
-              const errorMessage = error.message;
-            });
+      return res.status(200).json({message:"Otp sent to your mobile number please verify"});
 
     }
     catch(error) {
@@ -638,3 +668,16 @@ exports.deleteCustomer = async(req, res) =>{
     return res.status(500).json({ error: 'Failed to delete Customer' });
   }
 }
+
+const sendOtp = catchError(async(mobile) =>{
+  const otp = generateOTP();
+  const message = await client.messages.create({
+      body: `Your OTP code is: ${otp}`,
+      from: twilioPhoneNumber,
+      to: mobile
+  });
+
+  console.log(`OTP sent successfully: ${message.sid}`);
+  return  otp ;
+
+})
