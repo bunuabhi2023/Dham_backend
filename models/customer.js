@@ -2,24 +2,24 @@ const mongoose = require("mongoose");
 
 const customers = new mongoose.Schema(
     {
-        name:{
+        firstname:{
+            type:String,
+            required:true,
+            maxLength:255,
+        },
+        lastname:{
             type:String,
             required:true,
             maxLength:255,
         },
         email: {
             type:String, trim: true , unique:true,
-            required:true,
-            maxLength:255,
-        },
-        username: {
-            type:String, trim: true , unique:true,
-            required:true,
+            required:false,
             maxLength:255,
         },
         password: {
             type:String,
-            required:true,
+            required:false,
             maxLength:255,
         },
         email_otp: {

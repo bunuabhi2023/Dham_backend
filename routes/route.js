@@ -51,6 +51,7 @@ router.post("/verify-email",  userController.verifyEmail);
 //Customer Route//
 router.post("/register-customer", customerController.signup);
 router.post("/login-customer", customerController.login);
+router.post("/otp-verify", customerController.verifyOtp);
 router.get("/get-my-profile", customerAuth, customerController.getMyProfile);
 router.put("/update-cust-profile",imageSingleUpload, customerAuth, customerController.updateMyProfile);
 router.get("/get-customer",  auth, isAdmin, customerController.getAllCustomers);
@@ -72,9 +73,6 @@ router.get("/top-hotels", homeController.TopHotels);
 router.get("/top-nearby", homeController.TopNearBy);
 
 //Booking Routes//
-router.post("/book-escort", customerAuth,bookingController.bookEscort);
-router.get("/get-all-booking", auth, isAdmin, bookingController.getAllBooking);
-router.get("/get-booking-by-id/:id",  bookingController.getBookingById);
 
 
 
