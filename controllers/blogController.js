@@ -82,7 +82,14 @@ exports.publishBlog = catchError(async(req, res) =>{
 
 exports.getAllBlogs = catchError(async(req, res) =>{
     const blogs = await Blog.find({status:"published"}).populate('cityId', 'name').exec();
-    return res.status(200).json({blogs});
+    const updatedBlogs = blogs.map(blog => {
+        const blogObj = blog.toObject();
+        blogObj.id = blogObj._id;
+        delete blogObj._id;
+        
+        return blogObj;
+    });
+    return res.status(200).json({updatedBlogs});
 
 });
 

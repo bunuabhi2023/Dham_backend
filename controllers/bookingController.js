@@ -9,28 +9,9 @@ const razorpay = new Razorpay({
 });
 
 exports.createBooking = catchError(async (req, res) => {
-  const {
-    hotelId,
-    roomId,
-    customerId,
-    customerFirstName,
-    customerLastName,
-    email,
-    mobile,
-    state,
-    city,
-    pincode,
-    isGuest,
-    checkInDate,
-    checkOutDate,
-    perDayPrice,
-    taxAmount,
-    totalPrice,
-    discountPrice,
-    finalPrice,
-    isPartialPay,
-    paidAmount,
-    paymentMethod, 
+  const {hotelId,roomId,customerId,customerFirstName,customerLastName,email,
+    mobile,state,city,pincode,isGuest,checkInDate,checkOutDate,perDayPrice,
+    taxAmount,totalPrice,discountPrice,finalPrice,isPartialPay,paidAmount,paymentMethod, 
   } = req.body;
 
   if (!paymentMethod) {
