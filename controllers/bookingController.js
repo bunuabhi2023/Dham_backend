@@ -4,8 +4,8 @@ const { catchError } = require("../middlewares/CatchError");
 const crypto = require("crypto");
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
+  key_id: 'rzp_live_RFDCf6fNpIDBTl',
+  key_secret: 'EGt4ymeXKGxJ1hTnDr8j0b2j'
 });
 
 exports.createBooking = catchError(async (req, res) => {
