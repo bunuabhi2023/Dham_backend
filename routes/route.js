@@ -189,7 +189,7 @@ router.delete("/delete-guid/:id", auth, isAdmin, guidController.deleteGuid);
 //Blog Routes//
 router.post("/create-blog", imageMultiUpload, auth, isAdmin, blogController.createBlog);
 router.get("/get-blog-by-admin",  auth, isAdmin, blogController.getBlogByAdmin);
-router.get("/get-blog-by-id/:id",  auth, isAdmin, blogController.getBlogById);
+router.get("/get-blog-by-id/:id",  blogController.getBlogById);
 router.put("/update-blog/:id", imageMultiUpload, auth, isAdmin, blogController.updateBlog);
 router.put("/publish-blog/:id",  auth, isAdmin, blogController.publishBlog);
 router.get("/get-blogs",  blogController.getAllBlogs);
