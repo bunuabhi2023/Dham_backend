@@ -18,10 +18,8 @@ app.use(
             "http://127.0.0.1:5174",
             'http://localhost:5174',
             "http://localhost:3000",
-            "https://dhaam.netlify.app",
             "https://dham-super-admin.netlify.app/",
-            "http://192.168.1.34:3000",
-            "http://13.127.11.0"
+            "http://13.127.11.0/backend/api/v1"
           ],
           credentials: true,
     })
@@ -30,7 +28,7 @@ app.use(
 app.use('/uploads', express.static('uploads'));
 // load config from env file
 require("dotenv").config();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 //middleware to parse json request body
 app.use(express.json());
