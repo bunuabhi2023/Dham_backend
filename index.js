@@ -21,7 +21,7 @@ app.use(
             "https://dhaam.netlify.app",
             "https://dham-super-admin.netlify.app/",
             "http://192.168.1.34:3000",
-            "http://13.127.11.0/"
+            "http://13.127.11.0"
           ],
           credentials: true,
     })
