@@ -164,7 +164,7 @@ router.get("/get-hotels", hotelController.getHotelsForUser);
 router.get("/get-all-hotels", hotelController.getAllHotels);
 router.get("/get-hotel-by-id/:id", hotelController.getHotelById);
 router.delete("/delete-hotel/:id", auth, isAdmin, hotelController.deleteHotel);
-router.get("/get-hotel-details/:id", hotelController.gethotelDetails);
+router.get("/get-hotel-details/:cityId/:id", hotelController.gethotelDetails);
 router.get("/get-hotel-by-city/:cityId", hotelController.getHotelByCity);
 
 //Hotel Rooms Management//
