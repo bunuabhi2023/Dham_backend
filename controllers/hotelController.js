@@ -337,8 +337,8 @@ exports.getHotelByCity = catchError(async(req, res) =>{
     query.amenitiesId = { $in: amenitiesArray };
   }
 
-  if (req.query.properTypeId) {
-      query.properTypeId = req.query.properTypeId; 
+  if (req.query.propertyTypeId) {
+      query.propertyTypeId = req.query.propertyTypeId; 
   }
 
   if (priceRange) {
@@ -346,6 +346,8 @@ exports.getHotelByCity = catchError(async(req, res) =>{
     query.offerPrice = { $gte: minPrice, $lte: maxPrice };
   } else if (min_price !== undefined && max_price !== undefined) {
     query.offerPrice = { $gte: Number(min_price), $lte: Number(max_price) };
+  }else if(min_price !== undefined){
+    query.offerPrice = { $gte: Number(min_price) };
   }
 
   const hotels = await User.find(query).exec();
