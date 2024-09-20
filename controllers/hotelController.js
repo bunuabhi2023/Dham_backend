@@ -260,8 +260,8 @@ exports.deleteHotel = catchError(async(req, res) =>{
 
 
 exports.gethotelDetails = catchError(async(req, res) =>{
-  const hotel = await User.findById(req.params.id).populate('amenitiesId').lean().exec();
-  const hotelRooms = await HotelsRooms.find({userId:req.params.id}).populate('roomCategoryId', 'name').populate('amenitiesId').lean().exec();
+  const hotel = await User.findById(req.params.id).populate('amenitiesId', 'name').populate('propertyTypeId', 'name').lean().exec();
+  const hotelRooms = await HotelsRooms.find({userId:req.params.id}).populate('roomCategoryId', 'name').populate('amenitiesId', 'name').lean().exec();
   const cityId = hotel.cityId;
   const nearbies = await NearBy.find({cityId:cityId});
 
@@ -334,7 +334,7 @@ exports.getHotelByCity = catchError(async(req, res) =>{
 
   if (amenities) {
     const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
-    query.amenitiesId = { $in: amenitiesArray };
+    query.amenitiesId = { $all: amenitiesArray };
   }
 
   if (req.query.propertyTypeId) {
@@ -350,7 +350,7 @@ exports.getHotelByCity = catchError(async(req, res) =>{
     query.offerPrice = { $gte: Number(min_price) };
   }
 
-  const hotels = await User.find(query).exec();
+  const hotels = await User.find(query).populate('amenitiesId', 'name').populate('propertyTypeId', 'name').exec();
 
   const updatedHotels = hotels.map(hotel => {
       const hotelObj = hotel.toObject();

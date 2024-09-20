@@ -23,6 +23,7 @@ const blogController = require('../controllers/blogController');
 const homeController = require('../controllers/homeController');
 const propertyTypeController =  require('../controllers/propertyTypeController');
 const tourEventController = require('../controllers/tourEventController');
+const foodAndDiningController = require('../controllers/foodAndDiningController');
 
 
 
@@ -210,6 +211,14 @@ router.get("/upcoming-tours-events", tourEventController.upComingTourEvent);
 router.get("/top-destinations", tourEventController.topDestination);
 router.get("/event-tour-by-id/:id", tourEventController.getTourAndEventById);
 router.delete("/delete-event-tour/:id",auth, isAdmin, tourEventController.deleteTourEvent);
+
+//food and dining routes//
+router.post("/create-food-and-dining", auth, isAdmin, foodAndDiningController.createFoodAndDining);
+router.put("/update-food-and-dining/:id", auth, isAdmin, foodAndDiningController.updateFoodDiningById);
+router.get("/get-food-and-dining", auth, isAdmin, foodAndDiningController.getFoodAndDining);
+router.get("/food-and-dining-by-id/:id", foodAndDiningController.getFoodDiningById);
+router.get("/all-food-and-dining", foodAndDiningController.getAllFoodDining);
+router.delete("/delete-food-and-dining/:id", auth, isAdmin, foodAndDiningController.deleteFoodDining);
 
 
 module.exports = router;
