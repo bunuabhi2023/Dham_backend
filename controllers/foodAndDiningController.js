@@ -8,7 +8,7 @@ exports.createFoodAndDining = catchError(async(req, res) =>{
         return res.status(409).json({message:"Enterd Food And Dining is already exist."});
     }
     
-    const newFoodAndDining = new FoodDining({name, file});
+    const newFoodAndDining = new FoodDining({name});
     const savedFoodAndDining = await newFoodAndDining.save();
 
     return res.status(200).json({FoodDining:savedFoodAndDining});
