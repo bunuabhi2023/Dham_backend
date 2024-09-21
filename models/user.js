@@ -122,6 +122,11 @@ const users = new mongoose.Schema(
             ref: 'PropertyType',
             required: false,
         },
+        foodAndDiningId:[{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodDining',
+            required: false,
+        }],
         pincode:{
             type:String,
             required:false,

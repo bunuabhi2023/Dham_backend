@@ -9,7 +9,7 @@ const {catchError} = require('../middlewares/CatchError');
 const HotelsRooms = require('../models/hotelsRooms');
 
 exports.createHotel = catchError(async(req, res) =>{
-    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId } = req.body;
+    const { name, email, mobile, password, countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId, foodAndDiningId } = req.body;
     const files = req.s3FileUrls;
 
 
@@ -60,6 +60,7 @@ exports.createHotel = catchError(async(req, res) =>{
       offerPrice,
       amenitiesId,
       propertyTypeId,
+      foodAndDiningId,
       location:parsedLocation,
       files
     });
@@ -79,7 +80,7 @@ exports.updateHotel = catchError(async(req, res) =>{
     res.status(404).json({message:"Hotel Not Found."});
   }
 
-  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId } = req.body;
+  const { name, email, mobile,  countryId, stateId, cityId, pincode, address, location, price, offerPrice, amenitiesId, propertyTypeId, foodAndDiningId } = req.body;
   const files = req.s3FileUrls;
    
   const duplicateHotel = await User.findOne({
@@ -118,6 +119,7 @@ exports.updateHotel = catchError(async(req, res) =>{
   hotel.offerPrice = offerPrice??hotel.offerPrice;
   hotel.amenitiesId = amenitiesId??hotel.amenitiesId;
   hotel.propertyTypeId = propertyTypeId??hotel.propertyTypeId;
+  hotel.foodAndDiningId = foodAndDiningId??hotel.foodAndDiningId;
   hotel.save();
 
   res.status(201).json({message:"Hotel Updated Successfully"});
@@ -159,6 +161,7 @@ exports.getMyHotels = catchError(async(req, res) => {
       .populate('stateId', 'name')
       .populate('cityId', 'name')
       .populate('propertyTypeId', 'name')
+      .populate('foodAndDiningId', 'name')
       .populate('amenitiesId')
       .skip((page - 1) * pageSize)
       .limit(pageSize)
@@ -230,7 +233,10 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
 });
 
 exports.getHotelById = catchError(async(req, res) =>{
-  const hotel = await User.findById(req.params.id).populate('cityId', 'name').exec();
+  const hotel = await User.findById(req.params.id)
+                        .populate('cityId', 'name')
+                        .populate('foodAndDiningId', 'name')
+                        .exec();
 
   return res.status(200).json({data:hotel});
 })
@@ -260,7 +266,12 @@ exports.deleteHotel = catchError(async(req, res) =>{
 
 
 exports.gethotelDetails = catchError(async(req, res) =>{
-  const hotel = await User.findById(req.params.id).populate('amenitiesId', 'name').populate('propertyTypeId', 'name').lean().exec();
+  const hotel = await User.findById(req.params.id)
+                          .populate('amenitiesId', 'name')
+                          .populate('propertyTypeId', 'name')
+                          .populate('foodAndDiningId', 'name')
+                          .lean()
+                          .exec();
   const hotelRooms = await HotelsRooms.find({userId:req.params.id}).populate('roomCategoryId', 'name').populate('amenitiesId', 'name').lean().exec();
   const cityId = hotel.cityId;
   const nearbies = await NearBy.find({cityId:cityId});
@@ -328,13 +339,18 @@ function calculateDistance(coords1, coords2) {
 
 exports.getHotelByCity = catchError(async(req, res) =>{
   const { cityId } = req.params;
-  const { amenities, priceRange, min_price, max_price } = req.query;
+  const { amenities, foodAndDinings, priceRange, min_price, max_price } = req.query;
 
   let query = { cityId: cityId };
 
   if (amenities) {
     const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
     query.amenitiesId = { $all: amenitiesArray };
+  }
+
+  if (foodAndDinings) {
+    const foodAndDiningsArray = Array.isArray(foodAndDinings) ? foodAndDinings : [foodAndDinings];
+    query.foodAndDiningId = { $all: foodAndDiningsArray };
   }
 
   if (req.query.propertyTypeId) {
@@ -350,7 +366,11 @@ exports.getHotelByCity = catchError(async(req, res) =>{
     query.offerPrice = { $gte: Number(min_price) };
   }
 
-  const hotels = await User.find(query).populate('amenitiesId', 'name').populate('propertyTypeId', 'name').exec();
+  const hotels = await User.find(query)
+  .populate('amenitiesId', 'name')
+  .populate('propertyTypeId', 'name')
+  .populate('foodAndDiningId', 'name')
+  .exec();
 
   const updatedHotels = hotels.map(hotel => {
       const hotelObj = hotel.toObject();
