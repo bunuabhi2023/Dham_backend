@@ -19,7 +19,8 @@ app.use(
             'http://localhost:5174',
             "http://localhost:3000",
             "https://dham-super-admin.netlify.app/",
-            "http://13.127.11.0/backend/api/v1"
+            "http://13.127.11.0/backend/api/v1",
+            "https://dham-backend.onrender.com/"
           ],
           credentials: true,
     })
