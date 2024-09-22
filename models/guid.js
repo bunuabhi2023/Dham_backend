@@ -107,6 +107,20 @@ const guids = new mongoose.Schema(
             required:false,
             maxLength:5000,
         },
+        about:{
+            type:String,
+            required:false,
+            maxLength:5000,
+        },
+        pricePerHour:{
+            type:Number,
+            required:false,
+        },
+        languages:[{
+            type:String,
+            required:false,
+            maxLength:255,
+        }],
         createdAt:{
             type:Date,
             required:true,

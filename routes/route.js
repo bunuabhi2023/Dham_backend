@@ -186,6 +186,8 @@ router.put("/update-guid/:id", imageSingleUpload, auth, isAdmin, guidController.
 router.get("/get-guid-by-city/:cityId", guidController.getGuidByCity);
 router.get("/get-all-guid",auth, isAdmin, guidController.getAllGuids);
 router.delete("/delete-guid/:id", auth, isAdmin, guidController.deleteGuid);
+router.get("/guids", guidController.getGuides);
+router.get("/get-guide-by-id/:id", guidController.getGuideById);
 
 //Blog Routes//
 router.post("/create-blog", imageMultiUpload, auth, isAdmin, blogController.createBlog);
@@ -206,6 +208,7 @@ router.get("/get-all-property-type", propertyTypeController.getAllPropertyType);
 //Tour And Event Routes//
 router.post("/create-tour-event",imageMultiUpload, auth, isAdmin, tourEventController.createTourEvent);
 router.put("/update-tour-event/:id",imageMultiUpload, auth, isAdmin, tourEventController.updateTourEvent);
+router.get("/all-events-tours", tourEventController.getAllEventsAndTours);
 router.get("/get-current-city-tour", tourEventController.currentCityTour);
 router.get("/upcoming-tours-events", tourEventController.upComingTourEvent);
 router.get("/top-destinations", tourEventController.topDestination);

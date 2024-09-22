@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const {catchError} = require('../middlewares/CatchError');
 
 exports.createGuid = catchError(async(req, res) =>{
-    const { name, email, mobile, password,  cityId, pincode, address, location } = req.body;
+    const { name, email, mobile, password,  cityId, pincode, address, location, pricePerHour, languages, about } = req.body;
     const file = req.s3FileUrl;
     const existingUser = await Guid.findOne({
         $or: [{ email }, { mobile }],
@@ -23,7 +23,10 @@ exports.createGuid = catchError(async(req, res) =>{
       cityId,
       pincode,
       address,
-      location,
+      location, 
+      pricePerHour, 
+      languages,
+      about,
       file
     });
 
@@ -74,7 +77,7 @@ exports.editGuid = catchError(async(req, res) =>{
       res.status(404).json({message:"Guid Not Found."});
     }
   
-    const { name, email, mobile, cityId, pincode, address } = req.body;
+    const { name, email, mobile, cityId, pincode, address,  pricePerHour, languages, about } = req.body;
     const file = req.s3FileUrl;
      
     const duplicateGuid = await Guid.findOne({
@@ -94,7 +97,10 @@ exports.editGuid = catchError(async(req, res) =>{
     guid.cityId = cityId;
     guid.pincode = pincode;
     guid.address = address;
+    guid.pricePerHour = pricePerHour;
+    guid.languages = languages;
     guid.file = file;
+    guid.about = about;
     guid.save();
   
     res.status(201).json({message:"Guid Updated Successfully"});
@@ -105,4 +111,32 @@ exports.deleteGuid = catchError(async(req, res) =>{
     const deleteGuid = await Guid.findByIdAndDelete(req.params.id);
 
     return res.status(200).json({message:"Record Deleted Successfuly!"});
+});
+
+exports.getGuides = catchError(async(req, res) =>{
+    const guids = await Guid.find().populate('cityId', 'name').lean().exec();
+    const ratings = [3.5, 4, 4.5]; // Predefined ratings
+    const updatedGuids = guids.map(guid => {
+        const guidObj = guid.toObject ? guid.toObject() : guid; // Ensure we can access as an object
+        guidObj.id = guidObj._id;
+        delete guidObj._id;
+
+        // Add a random rating from the predefined set
+        guidObj.rating = ratings[Math.floor(Math.random() * ratings.length)];
+
+        return guidObj;
+    });
+
+    return res.status(200).json({ data: updatedGuids });
+});
+
+exports.getGuideById = catchError(async(req, res) =>{
+    const guide = await Guid.findById(req.params.id).populate('cityId', 'name').lean().exec();
+
+    guide.id = guide._id;
+    delete guide._id;
+    guide.rating = 4.5;
+
+    return res.status(200).json({guide});
+
 })
