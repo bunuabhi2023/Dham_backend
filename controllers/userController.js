@@ -72,12 +72,12 @@ exports.login = async (req,res) => {
                 message:'User is not registered',
             });
         }
-        if(user.role != "Admin"){
-          return res.status(401).json({
-            success:false,
-            message:'You Are Not Admin',
-        });
-        }
+        // if(user.role != "Admin"){
+        //   return res.status(401).json({
+        //     success:false,
+        //     message:'You Are Not Admin',
+        // });
+        // }
 
         if(await bcrypt.compare(password,user.password) ) {
           const otp = Math.floor(100000 + Math.random() * 900000);
