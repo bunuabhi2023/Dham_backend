@@ -70,14 +70,14 @@ exports.updateBlog = catchError(async(req, res) =>{
 });
 
 exports.publishBlog = catchError(async(req, res) =>{
-    const status ='published';
+    const {status} = req.body;
 
     const blog = await Blog.findById(req.params.id).exec();
 
     blog.status = status;
     const updatedStatus = await blog.save();
 
-    return res.status(201).json({message:"Blog Published successfully!"})
+    return res.status(201).json({message:"Blog Updated successfully!"})
 });
 
 exports.getAllBlogs = catchError(async(req, res) =>{

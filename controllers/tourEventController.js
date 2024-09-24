@@ -205,6 +205,7 @@ exports.getAllEventsAndTours = catchError(async (req, res) => {
     allEventsTours,
     currentPage: page,
     totalPages: Math.ceil(totalDocuments / pageSize),
+    count: Math.ceil(await TourEvent.countDocuments(query)),
   });
 });
 
