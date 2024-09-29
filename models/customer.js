@@ -13,7 +13,7 @@ const customers = new mongoose.Schema(
             maxLength:255,
         },
         email: {
-            type:String, trim: true , unique:true,
+            type:String, trim: true,
             required:false,
             maxLength:255,
         },
