@@ -27,6 +27,19 @@ const toursevents = new mongoose.Schema(
             type:String,
             required:true
         },
+
+        packageCost:[
+            {
+                package:{
+                    type:String,
+                    required:true,
+                },
+                cost:{
+                    type:Number,
+                    required:true,
+                }
+            }
+        ],
         cost:{
             type:Number,
             required:true,

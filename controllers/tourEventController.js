@@ -9,7 +9,7 @@ exports.createTourEvent = catchError(async (req, res) => {
     end_at,
     departure_date,
     departure_time,
-    cost,
+    packageCost,
     duration,
     plans,
     type,
@@ -30,6 +30,14 @@ exports.createTourEvent = catchError(async (req, res) => {
     return res.status(400).json({ message: 'Invalid plans format' });
   }
 
+  
+  let parsedPackageCost;
+  try {
+    parsedPackageCost = typeof packageCost === 'string' ? JSON.parse(packageCost) : packageCost;
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid packageCost format' });
+  }
+
   const newTourEvent = new TourEvent({
     title,
     description,
@@ -37,7 +45,7 @@ exports.createTourEvent = catchError(async (req, res) => {
     end_at,
     departure_date,
     departure_time,
-    cost,
+    packageCost:parsedPackageCost,
     duration,
     plans:parsedPlans,
     type,
@@ -63,7 +71,7 @@ exports.updateTourEvent = catchError(async (req, res) => {
     end_at,
     departure_date,
     departure_time,
-    cost,
+    packageCost,
     duration,
     plans,
     type,
@@ -83,6 +91,14 @@ exports.updateTourEvent = catchError(async (req, res) => {
     return res.status(400).json({ message: 'Invalid plans format' });
   }
 
+  
+  let parsedPackageCost;
+  try {
+    parsedPackageCost = typeof packageCost === 'string' ? JSON.parse(packageCost) : packageCost;
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid packageCost format' });
+  }
+
   const updatedFields = {
     title,
     description,
@@ -90,7 +106,7 @@ exports.updateTourEvent = catchError(async (req, res) => {
     end_at,
     departure_date,
     departure_time,
-    cost,
+    packageCost:parsedPackageCost,
     duration,
     plans: parsedPlans,
     type,
