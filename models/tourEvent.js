@@ -21,11 +21,11 @@ const toursevents = new mongoose.Schema(
         },
         departure_date:{
             type:Date,
-            required:true
+            required:false
         },
         departure_time:{
             type:String,
-            required:true
+            required:false
         },
 
         packageCost:[
@@ -40,10 +40,6 @@ const toursevents = new mongoose.Schema(
                 }
             }
         ],
-        cost:{
-            type:Number,
-            required:true,
-        },
         duration:{
             type:Number,
             required:true,
