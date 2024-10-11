@@ -119,6 +119,10 @@ const bookings = new mongoose.Schema(
             type:Number,
             required:false,
         }, 
+        dueAmount:{
+            type:Number,
+            required:false,
+        },
         paymentDate:{      
             type:Date,
             required:false,
