@@ -1,5 +1,11 @@
 const Customer = require ('../models/customer');
 const User = require('../models/user');
+const Guid = require('../models/guid');
+const Blog = require('../models/blog');
+const City = require('../models/city');
+const Amenity = require('../models/amenities');
+const FoodDining = require('../models/FoodAndDining');
+const PropertyType = require('../models/propertyType');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -682,3 +688,73 @@ const sendOtp = catchError(async(mobile) =>{
   return  otp ;
 
 })
+
+exports.search = catchError(async (req, res) => {
+  const { tag, search } = req.query;
+
+  try {
+      let usersData = [];
+      let guidesData = [];
+      let blogsData = [];
+
+      if (tag === "search_all" || tag === "city") {
+          const cities = await City.find({ name: new RegExp(search, 'i') });
+          const cityIds = cities.map(city => city._id);
+
+          if (tag === "search_all" || tag === "city") {
+              usersData = await User.find({ cityId: { $in: cityIds } })
+                  .populate('amenitiesId')
+                  .populate('foodAndDiningId')
+                  .populate('propertyTypeId');
+
+              guidesData = await Guid.find({ cityId: { $in: cityIds } });
+              blogsData = await Blog.find({ cityId: { $in: cityIds } });
+          }
+      }
+
+      if (tag === "search_all" || tag === "hotel") {
+          // Search in Users table for name, hotelName, amenitiesId, propertyTypeId, and foodAndDiningId
+          const amenities = await Amenity.find({ name: new RegExp(search, 'i') });
+          const foodDining = await FoodDining.find({ name: new RegExp(search, 'i') });
+          const propertyTypes = await PropertyType.find({ name: new RegExp(search, 'i') });
+
+          const amenitiesIds = amenities.map(amenity => amenity._id);
+          const foodDiningIds = foodDining.map(food => food._id);
+          const propertyTypeIds = propertyTypes.map(type => type._id);
+
+          usersData = await User.find({
+              $or: [
+                  { name: new RegExp(search, 'i') },
+                  { hotelName: new RegExp(search, 'i') },
+                  { amenitiesId: { $in: amenitiesIds } },
+                  { foodAndDiningId: { $in: foodDiningIds } },
+                  { propertyTypeId: { $in: propertyTypeIds } }
+              ]
+          }).populate('amenitiesId').populate('foodAndDiningId').populate('propertyTypeId');
+      }
+
+      if (tag === "search_all" || tag === "guide") {
+          guidesData = await Guid.find({ name: new RegExp(search, 'i') });
+      }
+
+      if (tag === "search_all") {
+          blogsData = await Blog.find({ 
+              $or: [
+                  { title: new RegExp(search, 'i') },
+                  { tags: new RegExp(search, 'i') }
+              ]
+          });
+      }
+
+      const result = {
+          users: usersData,
+          guides: guidesData,
+          blogs: blogsData
+      };
+
+      return res.status(200).json(result);
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'An error occurred while searching.' });
+  }
+});

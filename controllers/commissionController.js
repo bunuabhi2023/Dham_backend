@@ -39,7 +39,7 @@ exports.getAllCommission = async(req, res) =>{
     }
 };
 
-exports.getCommissionByEscort = async(req, res) =>{
+exports.getCommissionByHotel = async(req, res) =>{
     try {
         const userId = req.params.id;
         const commission = await Commission.findOne({userId:userId}).populate('userId', 'name').exec();

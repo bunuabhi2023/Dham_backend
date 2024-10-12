@@ -67,6 +67,7 @@ router.post("/forget-customer-password",  customerController.forgotCustomerPassw
 router.post("/reset-customer-password",  customerController.resetCustomerPassword);
 router.post("/change-customer-password", customerAuth, customerController.updateCustomerPassword);
 router.delete("/delete-customer/:id",  auth, isAdmin, customerController.deleteCustomer);
+router.get('/search', customerController.search);
 
 //Home Routes//
 
@@ -104,7 +105,7 @@ router.get("/get-rating/:id",  ratingController.getEscortRating);
 //Commission Route//
 router.post("/set-commission", auth, isAdmin, commissionController.setCommission);
 router.get('/get-all-commission', auth, isAdmin, commissionController.getAllCommission);
-router.get("/get-commission-by-escort/:id", auth, isAdmin,  commissionController.getCommissionByEscort);
+router.get("/get-commission-by-hotel/:id", auth, isAdmin,  commissionController.getCommissionByHotel);
 
 
 //Dashboard Route//
