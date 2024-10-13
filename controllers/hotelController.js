@@ -267,7 +267,7 @@ exports.deleteHotel = catchError(async(req, res) =>{
 
 exports.gethotelDetails = catchError(async(req, res) =>{
   const hotel = await User.findById(req.params.id)
-                          .populate('amenitiesId', 'name')
+                          .populate('amenitiesId')
                           .populate('propertyTypeId', 'name')
                           .populate('foodAndDiningId', 'name')
                           .lean()

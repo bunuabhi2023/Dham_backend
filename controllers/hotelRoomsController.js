@@ -140,6 +140,21 @@ exports.getRoomsById = catchError(async(req, res) =>{
     const room = await HotelsRooms.findById(req.params.id);
     res.status(200).json({data:room});
 });
+exports.getRoomsByHotel = catchError(async(req, res) =>{
+    const rooms = await HotelsRooms.find({userId:req.params.id})
+    .populate('userId', 'name')
+    .populate('amenitiesId')
+    .populate('roomCategoryId', 'name').exec();
+
+    const updatedRooms = rooms.map(room => {
+        const roomObj = room.toObject();
+        roomObj.id = roomObj._id;
+        delete roomObj._id;
+        
+        return roomObj;
+    });
+    res.status(200).json({data:updatedRooms});
+});
 
 exports.updateHotelRoom = catchError(async(req, res) =>{
     console.log('Request body:', req.body); // Log received data
