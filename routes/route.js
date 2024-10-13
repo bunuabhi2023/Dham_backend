@@ -77,6 +77,7 @@ router.get("/top-nearby", homeController.TopNearBy);
 //Booking Routes//
 router.post("/book-property",customerAuth, bookingController.createBooking);
 router.post("/verify-payment", bookingController.verifyRazorpayPayment);
+router.get("/get-my-booking", customerAuth, bookingController.getBookingByCustomer);
 
 
 

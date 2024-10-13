@@ -99,6 +99,14 @@ const bookings = new mongoose.Schema(
             type:Number,
             required:true,
         },
+        propertyOwnerIncome:{
+            type:Number,
+            required:true,
+        },
+        totalCommission:{
+            type:Number,
+            required:true,
+        },
         paymentStatus:{
             type:String,
             enum:["pending", "paid", "canceled"],

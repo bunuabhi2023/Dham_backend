@@ -44,7 +44,7 @@ function generateOTP() {
 
 exports.signup = catchError(async (req, res) => {
  
-        const { firstname, lastname, mobile} = req.body;
+        const { firstname, lastname, mobile, email} = req.body;
     
         const existingCustomer = await Customer.findOne({
          mobile,
@@ -60,6 +60,7 @@ exports.signup = catchError(async (req, res) => {
           firstname,
           lastname,
           mobile,
+          email,
           password:null,
           email_otp: null,
           mobile_otp: otp,
@@ -236,7 +237,7 @@ exports.updateMyProfile = async(req, res) =>{
         
         const customerId = authenticatedUser._id;
     
-        const { name, email, mobile, dob, username } = req.body;
+        const { name, email, mobile, dob } = req.body;
         const updatedBy = req.customer.id;
     
        
@@ -279,7 +280,7 @@ exports.updateMyProfile = async(req, res) =>{
         }
           const updatedCustomer = await Customer.findByIdAndUpdate(
             customerId,
-            { name, email, mobile, dob, age, username, file, updatedBy, updatedAt: Date.now() },
+            { name, email, mobile, dob, age, file, updatedBy, updatedAt: Date.now() },
             { new: true }
           );
     
@@ -324,7 +325,7 @@ exports.getCustomerById = async (req, res) => {
 
 exports.updateCustomer = async(req,res) =>{
 
-    const { name, email, mobile, dob, username } = req.body;
+    const { name, email, mobile, dob } = req.body;
     const updatedBy = req.user.id;
 
     const file = req.s3FileUrl;
@@ -371,7 +372,7 @@ exports.updateCustomer = async(req,res) =>{
 
       const updatedCustomer = await Customer.findByIdAndUpdate(
         req.params.id,
-        { name, email, mobile, dob, age, username, file, updatedBy, updatedAt: Date.now() },
+        { name, email, mobile, dob, age,  file, updatedBy, updatedAt: Date.now() },
         { new: true }
       );
 

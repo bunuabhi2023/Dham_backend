@@ -45,6 +45,21 @@ const customers = new mongoose.Schema(
             type:Number,
             required:false,
         },
+        state: {
+            type:String,
+            required:false,
+            maxLength:255,
+        },
+        city: {
+            type:String,
+            required:false,
+            maxLength:255,
+        },
+        pincode: {
+            type:String,
+            required:false,
+            maxLength:255,
+        },
         latitude: {
             type:String,
             required:false,

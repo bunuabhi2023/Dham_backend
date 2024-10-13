@@ -1,5 +1,7 @@
 const Razorpay = require("razorpay");
 const Booking = require("../models/booking");
+const HotelsRooms = require('../models/hotelsRooms');
+const Commission = require('../models/commission');
 const { catchError } = require("../middlewares/CatchError");
 const crypto = require("crypto");
 
@@ -15,9 +17,7 @@ function hmac_sha256(data, key) {
 }
 
 exports.createBooking = catchError(async (req, res) => {
-  const {hotelId,roomId,customerFirstName,customerLastName,email,
-    mobile,state,city,pincode,isGuest,checkInDate,checkOutDate,perDayPrice,
-    taxAmount,totalPrice,discountPrice,finalPrice,isPartialPay,paidAmount,paymentMethod, 
+  const {hotelId,roomId,checkInDate,checkOutDate,discountPrice,paidAmount,paymentMethod, 
   } = req.body;
 
       
@@ -25,11 +25,52 @@ exports.createBooking = catchError(async (req, res) => {
 
   const customerId = authenticatedCustomer?authenticatedCustomer._id:null;
 
+  const customerFirstName = authenticatedCustomer?authenticatedCustomer.firstname:null;
+  const customerLastName = authenticatedCustomer?authenticatedCustomer.lastname:null;
+  const mobile = authenticatedCustomer?authenticatedCustomer.mobile:null;
+  const email = authenticatedCustomer?authenticatedCustomer.email:null;
+  const state = authenticatedCustomer?authenticatedCustomer.state:null;
+  const city = authenticatedCustomer?authenticatedCustomer.city:null;
+  const pincode = authenticatedCustomer?authenticatedCustomer.pincode:null;
+
+  const roomDetails = await HotelsRooms.findById(roomId).exec();
+  const perDayPrice = roomDetails.offerPrice;
+
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+
+  const timeDifference = checkOut.getTime() - checkIn.getTime();
+
+  const totalDays = timeDifference / (1000 * 3600 * 24);
+
+  const totalPrice = perDayPrice * totalDays;
+
+  const taxAmount = totalPrice * (18/100);
+  const finalPrice = totalPrice + taxAmount - discountPrice;
+
+
+
+
   if (!paymentMethod) {
     return res.status(400).json({ message: 'Payment method is required' });
   }
 
   const dueAmount = finalPrice - paidAmount;
+
+  let isPartialPay = false;
+
+  if(dueAmount > 0){
+    isPartialPay = true;
+  }else{
+    isPartialPay = false;
+  }
+
+  const commission = await Commission.find({userId:hotelId}).lean().exec();
+
+  const totalCommission = (finalPrice * (commission[0].commissionPercentage)/100)??0;
+
+  const propertyOwnerIncome = finalPrice - totalCommission;
+  
   const newBooking = new Booking({
     hotelId,
     roomId,
@@ -41,7 +82,6 @@ exports.createBooking = catchError(async (req, res) => {
     state,
     city,
     pincode,
-    isGuest,
     checkInDate,
     checkOutDate,
     perDayPrice,
@@ -51,6 +91,8 @@ exports.createBooking = catchError(async (req, res) => {
     finalPrice,
     isPartialPay,
     paidAmount,
+    totalCommission,
+    propertyOwnerIncome,
     dueAmount:dueAmount,
     bookingStatus: "pending",
     paymentStatus: "pending",
@@ -60,21 +102,21 @@ exports.createBooking = catchError(async (req, res) => {
 
   try {
   
-    if (paymentMethod === "cash") {
-      newBooking.bookingStatus = "booked";
-      newBooking.paymentStatus = "pending";
+    // if (paymentMethod === "cash") {
+    //   newBooking.bookingStatus = "booked";
+    //   newBooking.paymentStatus = "pending";
 
-      const savedBooking = await newBooking.save();
+    //   const savedBooking = await newBooking.save();
 
-      return res.status(200).json({
-        message: "Booking created successfully with cash payment",
-        booking: savedBooking
-      });
-    }
+    //   return res.status(200).json({
+    //     message: "Booking created successfully with cash payment",
+    //     booking: savedBooking
+    //   });
+    // }
 
 
     if (paymentMethod === "online") {
-      const amountToPay = isPartialPay ? paidAmount * 100 : finalPrice * 100;
+      const amountToPay = paidAmount * 100;
 
 
       const options = {
@@ -147,4 +189,26 @@ exports.verifyRazorpayPayment = catchError(async (req, res) => {
       });
     }
   });
+
+
+  exports.getBookingByCustomer = catchError(async(req, res) =>{
+    
+    const authenticatedCustomer = req.customer;
+
+    const customerId = authenticatedCustomer?authenticatedCustomer._id:null;
+    const bookings = await Booking.find({customerId:customerId})
+                     .populate('hotelId', 'name')
+                     .populate('roomId', 'roomCategoryId')
+                     .exec();
+
+    const updatedBookings = bookings.map(booking => {
+        const bookingObj = booking.toObject();
+        bookingObj.id = bookingObj._id;
+        delete bookingObj._id;
+        
+        return bookingObj;
+    });
+
+    return res.status(200).json({bookings:updatedBookings});
+  })
   
