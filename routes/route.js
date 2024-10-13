@@ -177,7 +177,7 @@ router.post("/create-my-room", auth, isHotel, imageMultiUpload, hotelRoomsContro
 router.get("/get-rooms-by-admin", auth, isAdmin, hotelRoomsController.getAllHotelsRooms);
 router.get("/get-my-rooms", auth, isHotel, hotelRoomsController.getAllMyHotelsRooms);
 router.get("/get-room-by-id/:id", hotelRoomsController.getRoomsById);
-router.put("/update-room-by-super-admin/:id", imageMultiUpload, auth,  hotelRoomsController.updateHotelRoom);
+router.put("/update-room-by-admin/:id", imageMultiUpload, auth,  hotelRoomsController.updateHotelRoom);
 router.delete("/delete-room/:id", auth,  hotelRoomsController.deleteHotelRoom);
 
 //Near By Routes//
