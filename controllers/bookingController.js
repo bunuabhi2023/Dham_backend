@@ -6,8 +6,8 @@ const { catchError } = require("../middlewares/CatchError");
 const crypto = require("crypto");
 
 const razorpay = new Razorpay({
-  key_id: 'rzp_live_RFDCf6fNpIDBTl',
-  key_secret: 'EGt4ymeXKGxJ1hTnDr8j0b2j'
+  key_id: 'rzp_live_9ahH7HBC42cQqs',
+  key_secret: '7Y0JRuImra6jOV9s9z6OxDZK'
 });
 
 function hmac_sha256(data, key) {
@@ -152,7 +152,7 @@ exports.verifyRazorpayPayment = catchError(async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingId } = req.body;
   
     try {
-      const secret = 'EGt4ymeXKGxJ1hTnDr8j0b2j';
+      const secret = '7Y0JRuImra6jOV9s9z6OxDZK';
       // Verify the signature using Razorpay secret
       const expectedSignature = hmac_sha256(
         `${razorpay_order_id}|${razorpay_payment_id}`,
