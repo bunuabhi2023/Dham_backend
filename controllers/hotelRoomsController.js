@@ -137,12 +137,17 @@ exports.getAllMyHotelsRooms = catchError(async(req, res) =>{
 
 
 exports.getRoomsById = catchError(async(req, res) =>{
-    const room = await HotelsRooms.findById(req.params.id);
+    const room = await HotelsRooms.findById(req.params.id)
+    .populate('userId', 'name')
+    .populate('cityId', 'name')
+    .populate('amenitiesId')
+    .populate('roomCategoryId', 'name').exec();
     res.status(200).json({data:room});
 });
 exports.getRoomsByHotel = catchError(async(req, res) =>{
     const rooms = await HotelsRooms.find({userId:req.params.id})
     .populate('userId', 'name')
+    .populate('cityId', 'name')
     .populate('amenitiesId')
     .populate('roomCategoryId', 'name').exec();
 

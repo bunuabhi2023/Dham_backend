@@ -227,7 +227,8 @@ exports.getAllEventsAndTours = catchError(async (req, res) => {
 
 
 exports.getTourAndEventById = catchError(async(req, res) =>{
-  const tourAndEvent = await TourEvent.findById(req.params.id).exec();
+  const tourAndEvent = await TourEvent.findById(req.params.id)
+  .populate('cityId', 'name').exec();
 
   tourAndEvent.id = tourAndEvent._id;
   delete tourAndEvent._id;
