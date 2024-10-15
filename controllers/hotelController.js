@@ -236,6 +236,8 @@ exports.getHotelById = catchError(async(req, res) =>{
   const hotel = await User.findById(req.params.id)
                         .populate('amenitiesId')
                         .populate('cityId', 'name')
+                        .populate('countryId', 'name')
+                        .populate('stateId', 'name')
                         .populate('propertyTypeId', 'name')
                         .populate('foodAndDiningId', 'name')
                         .exec();

@@ -45,36 +45,52 @@ function generateOTP() {
 exports.signup = catchError(async (req, res) => {
  
         const { firstname, lastname, mobile, email} = req.body;
+        const otp = generateOTP();
+
+        let savedCustomer = null;
     
         const existingCustomer = await Customer.findOne({
          mobile,
         });
+        if(existingCustomer){
+          if (existingCustomer.mobile_verified_at != null) {
+            return res.status(400).json({ message: 'User with Entered Mobile Number is already exists' });
+          }
+
+          if(existingCustomer.mobile_verified_at == null){
+            existingCustomer.firstname = firstname;
+            existingCustomer.lastname = lastname;
+            existingCustomer.mobile = mobile;
+            existingCustomer.email = email;
+            existingCustomer.mobile_otp = otp;
+            savedCustomer = await existingCustomer.save();
+
+          }
+
+        }else{
     
-        if (existingCustomer) {
-          return res.status(400).json({ message: 'User with Entered Mobile Number is already exists' });
+
+
+          const newCustomer = new Customer({
+            firstname,
+            lastname,
+            mobile,
+            email,
+            password:null,
+            email_otp: null,
+            mobile_otp: otp,
+            dob: null,
+            age:null,
+            latitude: null,
+            longitude: null,
+            mobile_verified_at: null,
+            email_verified_at: null,
+            file: null,
+          });
+      
+         savedCustomer =  await newCustomer.save();
+
         }
-
-        const otp = generateOTP();
-
-        const newCustomer = new Customer({
-          firstname,
-          lastname,
-          mobile,
-          email,
-          password:null,
-          email_otp: null,
-          mobile_otp: otp,
-          dob: null,
-          age:null,
-          latitude: null,
-          longitude: null,
-          mobile_verified_at: null,
-          email_verified_at: null,
-          file: null,
-        });
-    
-        // Save the new customer to the database
-       const savedCustomer =  await newCustomer.save();
 
        if(savedCustomer){
           const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -131,6 +147,7 @@ exports.verifyOtp = catchError(async(req, res)=>{
     });
 
   customer.mobile_otp = null;
+  customer.mobile_verified_at = Date.now();
   await customer.save();
   customer = customer.toObject();
   customer.token = token;

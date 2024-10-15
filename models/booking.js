@@ -119,6 +119,10 @@ const bookings = new mongoose.Schema(
             default: "cash"
 
         }, 
+        cancelReason:{
+            type:String,
+            required:false,   
+        },
         isPartialPay:{
             type:Boolean,
             default:false,

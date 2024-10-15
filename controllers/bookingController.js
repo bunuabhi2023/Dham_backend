@@ -197,8 +197,14 @@ exports.verifyRazorpayPayment = catchError(async (req, res) => {
 
     const customerId = authenticatedCustomer?authenticatedCustomer._id:null;
     const bookings = await Booking.find({customerId:customerId})
-                     .populate('hotelId', 'name')
-                     .populate('roomId', 'roomCategoryId')
+                     .populate('hotelId', 'name files') 
+                     .populate({
+                      path: 'roomId',
+                      populate: {
+                        path: 'roomCategoryId',
+                        select: 'name' 
+                      }
+                    })
                      .exec();
 
     const updatedBookings = bookings.map(booking => {
