@@ -2,34 +2,65 @@ const User = require('../models/user');
 const Customer = require('../models/customer');
 const Booking = require('../models/booking');
 
-exports.dashBoardData = async(req, res) =>{
+exports.dashBoardData = async (req, res) => {
     try {
         const totalCustomers = await Customer.countDocuments();
-        const totalEscorts = await User.countDocuments({ role: 'Escort' });
-       
+        const totalHotel = await User.countDocuments({ role: 'Hotel' });
+
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to the beginning of the day
-    
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1); // Set to the beginning of the next day
-    
-        // Convert today and tomorrow to strings in the format "YYYY-MM-DD"
-        const todayString = today.toISOString().split('T')[0];
-        const tomorrowString = tomorrow.toISOString().split('T')[0];
-    
-        const totalBookingsToday = await Booking.countDocuments({
-            bookingDate: tomorrowString
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); 
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1); // Next month, first day
+
+        // Calculate total bookings for the current month
+        const totalBookingsThisMonth = await Booking.countDocuments({
+            createdAt: { 
+                $gte: startOfMonth, 
+                $lt: endOfMonth // End of this month is the start of the next month
+            }
         });
+
+        // Calculate total revenue from all bookings
+        const totalRevenue = await Booking.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: "$totalCommission" }
+                }
+            }
+        ]);
+
+        // Calculate this month's revenue
+        const thisMonthRevenue = await Booking.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: startOfMonth,
+                        $lt: endOfMonth
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: "$totalCommission" }
+                }
+            }
+        ]);
+
         const dashBoardData = {
             totalCustomer: totalCustomers,
-            totalEscorts: totalEscorts,
-            totalBookingsToday:totalBookingsToday
-        }
+            totalHotel: totalHotel,
+            totalBookingsThisMonth: totalBookingsThisMonth,
+            totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0,
+            thisMonthRevenue: thisMonthRevenue.length > 0 ? thisMonthRevenue[0].total : 0
+        };
+
         res.json({ dashBoardData });
     } catch (error) {
-    res.status(500).json({ error: 'Could not fetch total customers.' });
+        res.status(500).json({ error: 'Something went wrong' });
     }
 };
+
 
 
 exports.getMonthlyBookingCounts = async (req, res) => {
@@ -54,7 +85,7 @@ const getBookingsByMonth = async (year) => {
         const endString = endDate.toISOString().split('T')[0];
 
         const count = await Booking.countDocuments({
-            bookingDate: { $gte: startString, $lte: endString }
+            createdAt: { $gte: startString, $lte: endString }
         });
 
         bookingsByMonth.push({ monthName: getMonthName(month), count });
