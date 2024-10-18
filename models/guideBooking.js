@@ -1,15 +1,10 @@
 const mongoose = require("mongoose");
 
-const bookings = new mongoose.Schema(
+const guidebookings = new mongoose.Schema(
     {
-        hotelId:{
+        guideId:{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required:true,
-        },
-        roomId:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'HotelsRooms',
+            ref: 'Guid',
             required:true,
         },
         customerId:{
@@ -17,59 +12,20 @@ const bookings = new mongoose.Schema(
             ref: 'Customer',
             required:false,
         },
-        customerFirstName:{
-            type:String,
-            required:false,
-            maxLength:255,
-        },
-        customerLastName:{
-            type:String,
-            required:false,
-            maxLength:255,
-        },
-        email:{
-            type:String,
-            required:false,
-            maxLength:255,
-        },
-        mobile:{
-            type:String,
-            required:true,
-            maxLength:255,
-        },
-        state:{
-            type:String,
-            required:false,
-            maxLength:255,
-        },
-        city:{
-            type:String,
-            required:false,
-            maxLength:255,
-        },
-        pincode:{
-            type:String,
-            required:false,
-            maxLength:255,
-        },
-        isGuest:{
-            type:Boolean,
-            default:false,
-        },
         bookingDate:{
             type:String,
             required:false,
         },
-        bookingTime:{
+        bookingTimeFrom:{
             type:String,
             required:false,   
         },
-        checkInDate:{      
-            type:Date,
-            required:true,
+        bookingTimeTo:{
+            type:String,
+            required:false,   
         },
-        checkOutDate:{      
-            type:Date,
+        totalBookingHours:{      
+            type:Number,
             required:true,
         },
         bookingStatus:{
@@ -78,15 +34,11 @@ const bookings = new mongoose.Schema(
             default: "pending"
 
         },
-        perDayPrice:{
+        perHourPrice:{
             type:Number,
             required:true,
         },
         taxAmount:{
-            type:Number,
-            required:true,
-        },
-        totalPrice:{
             type:Number,
             required:true,
         },
@@ -95,21 +47,21 @@ const bookings = new mongoose.Schema(
             required:true,
             default:0
         },
-        finalPrice:{
+        totalPrice:{
             type:Number,
             required:true,
         },
-        propertyOwnerIncome:{
+        guideIncome:{
             type:Number,
             required:true,
         },
         totalCommission:{
             type:Number,
-            required:true,
+            required:false,
         },
         paymentStatus:{
             type:String,
-            enum:["pending", "paid",  "partial_paid", "canceled"],
+            enum:["pending", "paid", "partial_paid", "canceled"],
             default: "pending"
 
         },  
@@ -151,4 +103,4 @@ const bookings = new mongoose.Schema(
         }
     }
 );
-module.exports = mongoose.model("Booking", bookings);
+module.exports = mongoose.model("GuideBooking", guidebookings);

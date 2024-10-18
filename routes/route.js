@@ -24,6 +24,7 @@ const homeController = require('../controllers/homeController');
 const propertyTypeController =  require('../controllers/propertyTypeController');
 const tourEventController = require('../controllers/tourEventController');
 const foodAndDiningController = require('../controllers/foodAndDiningController');
+const guideBookingController = require('../controllers/guideBookingController');
 
 
 
@@ -79,6 +80,13 @@ router.post("/book-property",customerAuth, bookingController.createBooking);
 router.post("/verify-payment", bookingController.verifyRazorpayPayment);
 router.get("/get-my-booking", customerAuth, bookingController.getBookingByCustomer);
 router.get("/get-booking-by-admin", auth, isAdmin, bookingController.getBookingByAdmin);
+
+//guide booking //
+router.post("/book-guide",customerAuth, guideBookingController.createGuideBooking);
+router.post("/payment-verification", guideBookingController.verifyRazorpayPayment);
+router.get("/get-guide-booking", customerAuth, guideBookingController.getBookingByCustomer);
+router.get("/get-guide-booking-by-admin", auth, isAdmin, guideBookingController.getBookingByAdmin);
+
 
 
 
