@@ -245,5 +245,39 @@ exports.verifyRazorpayPayment = catchError(async (req, res) => {
         totalPages: Math.ceil(await Booking.countDocuments(query) / pageSize),
         count: Math.ceil(await Booking.countDocuments(query)),
     });
+  });
+
+  exports.getBookingByHotelAdmin = catchError(async(req, res) =>{
+    
+    const authenticatedUser = req.user;
+
+    const userId = authenticatedUser?authenticatedUser._id:null;
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+
+    let query = {};
+    query.hotelId = userId;
+
+    const bookings = await Booking.find(query)
+      .populate('customerId', 'firstname lastname') 
+      .populate({
+      path: 'roomId',
+      populate: {
+        path: 'roomCategoryId',
+        select: 'name' 
+      }
+    })
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .lean();
+    
+    return res.status(200).json({
+        bookings,
+        currentPage: page,
+        totalPages: Math.ceil(await Booking.countDocuments(query) / pageSize),
+        count: Math.ceil(await Booking.countDocuments(query)),
+    });
+
+
   })
   

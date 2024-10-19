@@ -117,10 +117,16 @@ const guids = new mongoose.Schema(
             required:false,
         },
         languages:[{
-            type:String,
-            required:false,
-            maxLength:255,
-        }],
+            name:{
+                type:String,
+                required:false,
+                maxLength:255,
+            },
+            isKnow:{
+                type:Boolean,
+                default:true
+            }
+         }],
         createdAt:{
             type:Date,
             required:true,

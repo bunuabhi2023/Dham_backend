@@ -15,6 +15,13 @@ exports.createGuid = catchError(async(req, res) =>{
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    let parsedLanguages;
+    try {
+        parsedLanguages = typeof languages === 'string' ? JSON.parse(languages) : languages;
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid languages format' });
+    }
+
     const newGuid = new Guid({
       name,
       email,
@@ -25,7 +32,7 @@ exports.createGuid = catchError(async(req, res) =>{
       address,
       location, 
       pricePerHour, 
-      languages,
+      languages:parsedLanguages,
       about,
       file
     });
@@ -58,7 +65,7 @@ exports.getAllGuids = catchError(async(req, res) =>{
         query.name = { $regex:req.query.name, $options: 'i' };
     }
 
-    const guids = await Guid.find(query).populate('cityId', 'name').skip(skip).limit(pageSize).exec();
+    const guids = await Guid.find(query).populate('cityId', 'name').select('-password').skip(skip).limit(pageSize).exec();
   
 
     return res.status(200).json({
@@ -90,17 +97,25 @@ exports.editGuid = catchError(async(req, res) =>{
     if(duplicateGuid){
         return res.status(401).json({message:"Entered Email or Mobile Already Exist For Other Guid!"});
     }
+
+    
+    let parsedLanguages;
+    try {
+        parsedLanguages = typeof languages === 'string' ? JSON.parse(languages) : languages;
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid languages format' });
+    }
   
-    guid.name = name;
-    guid.email = email;
-    guid.mobile = mobile;
-    guid.cityId = cityId;
-    guid.pincode = pincode;
-    guid.address = address;
-    guid.pricePerHour = pricePerHour;
-    guid.languages = languages;
-    guid.file = file;
-    guid.about = about;
+    guid.name = name??guid.name;
+    guid.email = email??guid.email;
+    guid.mobile = mobile??guid.mobile;
+    guid.cityId = cityId??guid.cityId;
+    guid.pincode = pincode??guid.pincode;
+    guid.address = address??guid.address;
+    guid.pricePerHour = pricePerHour??guid.pricePerHour;
+    guid.languages = languages?parsedLanguages:guid.languages;
+    guid.file = file??guid.file;
+    guid.about = about??guid.about;
     guid.save();
   
     res.status(201).json({message:"Guid Updated Successfully"});
@@ -114,7 +129,7 @@ exports.deleteGuid = catchError(async(req, res) =>{
 });
 
 exports.getGuides = catchError(async(req, res) =>{
-    const guids = await Guid.find().populate('cityId', 'name').lean().exec();
+    const guids = await Guid.find().populate('cityId', 'name').select('-password').lean().exec();
     const ratings = [3.5, 4, 4.5]; // Predefined ratings
     const updatedGuids = guids.map(guid => {
         const guidObj = guid.toObject ? guid.toObject() : guid; // Ensure we can access as an object
@@ -131,7 +146,7 @@ exports.getGuides = catchError(async(req, res) =>{
 });
 
 exports.getGuideById = catchError(async(req, res) =>{
-    const guide = await Guid.findById(req.params.id).populate('cityId', 'name').lean().exec();
+    const guide = await Guid.findById(req.params.id).populate('cityId', 'name').select('-password').lean().exec();
 
     guide.id = guide._id;
     delete guide._id;
