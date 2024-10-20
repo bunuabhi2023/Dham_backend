@@ -15,6 +15,7 @@ exports.createTourEvent = catchError(async (req, res) => {
     type,
     departure_from,
     cityId,
+    stateId,
   } = req.body;
 
   const authenticatedUser = req.user;
@@ -51,6 +52,7 @@ exports.createTourEvent = catchError(async (req, res) => {
     type,
     departure_from,
     cityId,
+    stateId,
     createdBy:userId,
     files,
 
@@ -77,6 +79,7 @@ exports.updateTourEvent = catchError(async (req, res) => {
     type,
     departure_from,
     cityId,
+    stateId,
   } = req.body;
 
   const authenticatedUser = req.user;
@@ -112,6 +115,7 @@ exports.updateTourEvent = catchError(async (req, res) => {
     type,
     departure_from,
     cityId,
+    stateId,
     createdBy: userId,
     files,
   };
@@ -152,7 +156,7 @@ exports.upComingTourEvent = catchError(async(req, res) =>{
 
   const getUpcommingToursEvents = await TourEvent.find({
     start_from: { $gt: currentDate } 
-  }).lean().exec();
+  }).populate('cityId', 'name').populate('stateId', 'name').lean().exec();
   const EventTours = getUpcommingToursEvents.map(eventTour => {
     eventTour.id = eventTour._id;
       delete eventTour._id;
@@ -213,6 +217,7 @@ exports.getAllEventsAndTours = catchError(async (req, res) => {
     .skip(skip)
     .limit(pageSize)
     .populate('cityId', 'name')
+    .populate('stateId', 'name')
     .exec();
 
   const totalDocuments = await TourEvent.countDocuments(query);
@@ -228,7 +233,7 @@ exports.getAllEventsAndTours = catchError(async (req, res) => {
 
 exports.getTourAndEventById = catchError(async(req, res) =>{
   const tourAndEvent = await TourEvent.findById(req.params.id)
-  .populate('cityId', 'name').exec();
+  .populate('cityId', 'name').populate('stateId', 'name').exec();
 
   tourAndEvent.id = tourAndEvent._id;
   delete tourAndEvent._id;

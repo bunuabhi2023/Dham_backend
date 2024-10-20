@@ -93,6 +93,11 @@ const toursevents = new mongoose.Schema(
             ref: 'City',
             required: false,
         },
+        stateId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'State',
+            required: false,
+        },
         createdBy:{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
