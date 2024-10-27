@@ -176,15 +176,15 @@ exports.updateHotelRoom = catchError(async(req, res) =>{
 
     const room = await HotelsRooms.findById(req.params.id);
 
-    room.roomCategoryId = roomCategoryId;
-    room.amenitiesId = amenitiesId;
-    room.price = price;
-    room.offerPrice = offerPrice;
-    room.totalNoOfRooms= totalNoOfRooms;
-    room.area = area;
-    room.floor = floor;
-    room.bedSize = bedSize;
-    room.files = files;
+    room.roomCategoryId = roomCategoryId??room.roomCategoryId;
+    room.amenitiesId = amenitiesId??room.amenitiesId;
+    room.price = price??room.price;
+    room.offerPrice = offerPrice??room.offerPrice;
+    room.totalNoOfRooms= totalNoOfRooms??room.totalNoOfRooms;
+    room.area = area??room.area;
+    room.floor = floor??room.floor;
+    room.bedSize = bedSize??room.bedSize;
+    room.files = files??room.files;
    await room.save();
     return res.status(200).json({message:"Room updated Successfully!", data:room});
 });
@@ -194,4 +194,4 @@ exports.deleteHotelRoom = catchError(async(req, res) =>{
   
     return res.status(200).json({message:"Record Deleted Successfully!"});
 
-})
+});
