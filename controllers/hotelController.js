@@ -344,9 +344,11 @@ function calculateDistance(coords1, coords2) {
 
 exports.getHotelByCity = catchError(async(req, res) =>{
   const { cityId } = req.params;
-  const { amenities, foodAndDinings, priceRange, min_price, max_price } = req.query;
+  const { amenities, foodAndDinings, priceRange, min_price, max_price,page = 1, limit = 10 } = req.query;
 
   let query = { cityId: cityId };
+
+  const city = await City.findById(cityId).exec();
 
   if (amenities) {
     const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
@@ -371,11 +373,19 @@ exports.getHotelByCity = catchError(async(req, res) =>{
     query.offerPrice = { $gte: Number(min_price) };
   }
 
+  const pageNum = parseInt(page, 10);
+  const limitNum = parseInt(limit, 10);
+  const skip = (pageNum - 1) * limitNum;
+
+  // Fetch hotels with pagination
   const hotels = await User.find(query)
-  .populate('amenitiesId', 'name')
-  .populate('propertyTypeId', 'name')
-  .populate('foodAndDiningId', 'name')
-  .exec();
+    .populate('amenitiesId', 'name')
+    .populate('propertyTypeId', 'name')
+    .populate('foodAndDiningId', 'name')
+    .select('-password')
+    .skip(skip)
+    .limit(limitNum)
+    .exec();
 
   const updatedHotels = hotels.map(hotel => {
       const hotelObj = hotel.toObject();
@@ -416,10 +426,12 @@ exports.getHotelByCity = catchError(async(req, res) =>{
     offerPrice: { $gt: 11500, $lte: 15000 }
   });
 
+  const totalPages = Math.ceil( updatedHotels.length / limitNum);
   // Construct the response
   return res.status(200).json({
     hotels: updatedHotels,
     count : updatedHotels.length,
+    city : city.name,
     priceRangeCounts: {
       "0 to 1500": count0To1500,
       "1500 to 3000": count1500To3000,
@@ -427,7 +439,9 @@ exports.getHotelByCity = catchError(async(req, res) =>{
       "5500 to 7500": count5500To7500,
       "7500 to 11500": count7500To11500,
       "11500 to 15000": count11500To15000
-    }
+    },
+    currentPage: pageNum,
+    totalPages
   });
 
 });
