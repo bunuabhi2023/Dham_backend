@@ -4,12 +4,12 @@ const customers = new mongoose.Schema(
     {
         firstname:{
             type:String,
-            required:true,
+            required:false,
             maxLength:255,
         },
         lastname:{
             type:String,
-            required:true,
+            required:false,
             maxLength:255,
         },
         email: {

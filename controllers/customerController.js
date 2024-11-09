@@ -229,6 +229,82 @@ exports.login = async (req,res) => {
     }
 }
 
+
+exports.auth = catchError(async (req, res) => {
+  const { mobile } = req.body;
+
+  // Validate input
+  if (!mobile) {
+      return res.status(400).json({
+          success: false,
+          message: 'Please enter the mobile number',
+      });
+  }
+
+  // Generate OTP
+  const otp = generateOTP();
+  let savedCustomer;
+
+  // Check if customer already exists
+  let customer = await Customer.findOne({ mobile });
+
+  if (customer) {
+      // If customer exists but is already verified
+      if (customer.mobile_verified_at != null) {
+          // Update OTP for existing customer
+          customer.mobile_otp = otp;
+          savedCustomer = await customer.save();
+      } else {
+          // If customer exists but not verified, update info and OTP
+          customer.mobile_otp = otp;
+          savedCustomer = await customer.save();
+      }
+  } else {
+      // If customer does not exist, create a new one with OTP
+      const newCustomer = new Customer({
+          mobile,
+          mobile_otp: otp,
+          mobile_verified_at: null,
+          // Additional fields with null values or defaults
+          firstname: null,
+          lastname: null,
+          email: null,
+          password: null,
+          email_otp: null,
+          dob: null,
+          age: null,
+          latitude: null,
+          longitude: null,
+          email_verified_at: null,
+          file: null,
+      });
+
+      savedCustomer = await newCustomer.save();
+  }
+
+  // Send OTP using Twilio
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+  const twilio = require('twilio')(accountSid, authToken);
+  const message = await twilio.messages.create({
+      body: `Your OTP code is: ${otp}`,
+      from: twilioPhoneNumber,
+      to: mobile
+  });
+
+  if (message) {
+      console.log('OTP sent successfully:', message.sid);
+  } else {
+      console.error('Failed to send OTP.');
+  }
+
+  return res.status(200).json({
+      message: customer ? "OTP sent for login verification" : "OTP sent for signup verification",
+  });
+});
+
 exports.getMyProfile = async (req, res) => {
     try {
       const authenticatedUser = req.customer;
