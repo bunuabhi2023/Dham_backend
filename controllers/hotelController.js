@@ -343,12 +343,26 @@ function calculateDistance(coords1, coords2) {
 
 
 exports.getHotelByCity = catchError(async(req, res) =>{
-  const { cityId } = req.params;
-  const { amenities, foodAndDinings, priceRange, min_price, max_price,page = 1, limit = 10 } = req.query;
+ 
+  let {cityId,cityName, amenities, foodAndDinings, priceRange, min_price, max_price,page = 1, limit = 10 } = req.query;
+  let query = {};
+  let city;
 
-  let query = { cityId: cityId };
-
-  const city = await City.findById(cityId).exec();
+  if (cityId) {
+    city = await City.findById(cityId).exec();
+    if (city) {
+      query.cityId = cityId; // Add cityId to query only if it exists
+    }
+  } else if (cityName) {
+    // Find the city using a case-insensitive search for the cityName
+    city = await City.findOne({ name: { $regex: cityName, $options: 'i' } }).exec();
+    if (city) {
+      query.cityId = city._id; // Add cityId from the found city by name
+      cityId = city._id;
+    }
+  }else{
+    return res.status(404).json({ message: "City not found" });
+  }
 
   if (amenities) {
     const amenitiesArray = Array.isArray(amenities) ? amenities : [amenities];
@@ -431,7 +445,7 @@ exports.getHotelByCity = catchError(async(req, res) =>{
   return res.status(200).json({
     hotels: updatedHotels,
     count : updatedHotels.length,
-    city : city.name,
+    city : city.name??null,
     priceRangeCounts: {
       "0 to 1500": count0To1500,
       "1500 to 3000": count1500To3000,

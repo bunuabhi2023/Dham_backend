@@ -180,7 +180,7 @@ router.get("/get-all-hotels", hotelController.getAllHotels);
 router.get("/get-hotel-by-id/:id", hotelController.getHotelById);
 router.delete("/delete-hotel/:id", auth, isAdmin, hotelController.deleteHotel);
 router.get("/get-hotel-details/:cityId/:id", hotelController.gethotelDetails);
-router.get("/get-hotel-by-city/:cityId", hotelController.getHotelByCity);
+router.get("/get-hotel-by-city", hotelController.getHotelByCity);
 
 //Hotel Rooms Management//
 router.post("/create-room-by-admin", auth, isAdmin, imageMultiUpload, hotelRoomsController.createRoomsByAdmin);
@@ -200,7 +200,7 @@ router.get("/get-all-nearby",  auth, isAdmin, nearbyController.getAllNearBy);
 //Guid Route//
 router.post("/create-guid", imageSingleUpload, auth, isAdmin, guidController.createGuid);
 router.put("/update-guid/:id", imageSingleUpload, auth, isAdmin, guidController.editGuid);
-router.get("/get-guid-by-city/:cityId", guidController.getGuidByCity);
+router.get("/get-guid-by-city", guidController.getGuidByCity);
 router.get("/get-all-guid",auth, isAdmin, guidController.getAllGuids);
 router.delete("/delete-guid/:id", auth, isAdmin, guidController.deleteGuid);
 router.get("/guids", guidController.getGuides);

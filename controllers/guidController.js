@@ -1,4 +1,5 @@
 const Guid = require('../models/guid');
+const City = require('../models/city');
 const bcrypt = require('bcryptjs');
 const {catchError} = require('../middlewares/CatchError');
 
@@ -47,7 +48,28 @@ exports.createGuid = catchError(async(req, res) =>{
 
 
 exports.getGuidByCity = catchError(async(req, res) =>{
-    const guids = await Guid.find({cityId:req.params.cityId}).populate('cityId', 'name').exec();
+
+     let {cityId,cityName, page = 1, limit = 10 } = req.query;
+      let query = {};
+      let city;
+    
+      if (cityId) {
+        city = await City.findById(cityId).exec();
+        if (city) {
+          query.cityId = cityId; // Add cityId to query only if it exists
+        }
+      } else if (cityName) {
+        // Find the city using a case-insensitive search for the cityName
+        city = await City.findOne({ name: { $regex: cityName, $options: 'i' } }).exec();
+        if (city) {
+          query.cityId = city._id; // Add cityId from the found city by name
+          cityId = city._id;
+        }
+      }else{
+        return res.status(404).json({ message: "City not found" });
+      }
+
+    const guids = await Guid.find(query).populate('cityId', 'name').exec();
 
     return res.status(200).json({data:guids});
 });
