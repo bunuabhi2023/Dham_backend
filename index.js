@@ -20,7 +20,8 @@ app.use(
             "http://localhost:3000",
             "https://dham-super-admin.netlify.app",
             "https://dham-super-admin.vercel.app",
-            "https://dham-three.vercel.app"
+            "https://dham-three.vercel.app",
+            "https://dham2.netlify.app/"
           ],
           credentials: true,
     })
