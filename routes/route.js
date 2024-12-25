@@ -26,6 +26,7 @@ const tourEventController = require('../controllers/tourEventController');
 const foodAndDiningController = require('../controllers/foodAndDiningController');
 const guideBookingController = require('../controllers/guideBookingController');
 const ePujaController = require('../controllers/ePujaController');
+const ePujaBookingController = require('../controllers/ePujaBookingController');
 
 
 
@@ -247,6 +248,12 @@ router.put("/update-ePuja/:id", auth, isAdmin, ePujaController.updateEPuja);
 router.get("/ePuja",  ePujaController.getAllEPuja);
 router.get("/ePuja-by-id/:id", ePujaController.getPujaId);
 
+
+//ePuja Booking Routes//
+router.post("/book-puja", customerAuth, ePujaBookingController.createPujaBooking );
+router.post("/verify-puja-booking", ePujaBookingController.verifyRazorpayPayment );
+router.get("/get-puja-booking", customerAuth, ePujaBookingController.getBookingByCustomer);
+router.get("/get-puja-booking-by-admin", auth, isAdmin, ePujaBookingController.getBookingByAdmin);
 
 
 module.exports = router;
