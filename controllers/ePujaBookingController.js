@@ -16,7 +16,7 @@ function hmac_sha256(data, key) {
 }
 
 exports.createPujaBooking = catchError(async (req, res) => {
-  const {ePujaId,bookingDate,firstName,lastName,price 
+  const {ePujaId,bookingDate,gotra,note,cityId,firstName,lastName,price 
   } = req.body;
 
       
@@ -29,9 +29,12 @@ exports.createPujaBooking = catchError(async (req, res) => {
     ePujaId,
     customerId,
     bookingDate,
+    gotra,
     firstName,
     lastName,
     price,
+    cityId,
+    note,
     bookingStatus: "pending",
     paymentStatus: "pending",
     createdAt: Date.now(),

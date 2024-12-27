@@ -65,9 +65,12 @@ exports.createBooking = catchError(async (req, res) => {
     isPartialPay = false;
   }
 
-  const commission = await Commission.find({userId:hotelId}).lean().exec();
-
-  const totalCommission = (finalPrice * (commission[0].commissionPercentage)/100)??0;
+  const commission = await Commission.find({userId:hotelId}).exec();
+  let totalCommission = 0;
+  if(commission.length >0){
+    totalCommission = (finalPrice * (commission.commissionPercentage)/100);
+  }
+  
 
   const propertyOwnerIncome = finalPrice - totalCommission;
   

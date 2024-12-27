@@ -20,6 +20,19 @@ const epujabookings = new mongoose.Schema(
             type:String,
             required:true,   
         },
+        gotra:{
+            type:String,
+            required:false,   
+        },
+        note:{
+            type:String,
+            required:false,   
+        },
+        cityId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'City',
+            required: false,
+        },
         bookingDate:{
             type:String,
             required:true,   
