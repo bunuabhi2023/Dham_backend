@@ -5,6 +5,7 @@ const Blog = require('../models/blog');
 const City = require('../models/city');
 const Amenity = require('../models/amenities');
 const FoodDining = require('../models/FoodAndDining');
+const EventTour = require('../models/tourEvent');
 const PropertyType = require('../models/propertyType');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -790,12 +791,11 @@ exports.search = catchError(async (req, res) => {
       let usersData = [];
       let guidesData = [];
       let blogsData = [];
+      let tourAndEvents = [];
 
-      if (tag === "search_all" || tag === "city") {
+      if (tag === "city") {
           const cities = await City.find({ name: new RegExp(search, 'i') });
           const cityIds = cities.map(city => city._id);
-
-          if (tag === "search_all" || tag === "city") {
               usersData = await User.find({ cityId: { $in: cityIds } })
                   .populate('amenitiesId')
                   .populate('foodAndDiningId')
@@ -803,10 +803,11 @@ exports.search = catchError(async (req, res) => {
 
               guidesData = await Guid.find({ cityId: { $in: cityIds } });
               blogsData = await Blog.find({ cityId: { $in: cityIds } });
-          }
+              tourAndEvents = await EventTour.find({ cityId: { $in: cityIds } });
+          
       }
 
-      if (tag === "search_all" || tag === "hotel") {
+      if (tag === "hotel") {
           // Search in Users table for name, hotelName, amenitiesId, propertyTypeId, and foodAndDiningId
           const amenities = await Amenity.find({ name: new RegExp(search, 'i') });
           const foodDining = await FoodDining.find({ name: new RegExp(search, 'i') });
@@ -825,25 +826,94 @@ exports.search = catchError(async (req, res) => {
                   { propertyTypeId: { $in: propertyTypeIds } }
               ]
           }).populate('amenitiesId').populate('foodAndDiningId').populate('propertyTypeId');
+          const cityIds = usersData.map(city => city._id);
+
+          guidesData = await Guid.find({ cityId: { $in: cityIds } });
+          blogsData = await Blog.find({ cityId: { $in: cityIds } });
+          tourAndEvents = await EventTour.find({ cityId: { $in: cityIds } });
       }
 
-      if (tag === "search_all" || tag === "guide") {
+      if (tag === "guide") {
           guidesData = await Guid.find({ name: new RegExp(search, 'i') });
+          const cityIds = guidesData.map(city => city._id);
+          usersData = await User.find({ cityId: { $in: cityIds } })
+              .populate('amenitiesId')
+              .populate('foodAndDiningId')
+              .populate('propertyTypeId');
+
+          blogsData = await Blog.find({ cityId: { $in: cityIds } });
+          tourAndEvents = await EventTour.find({ cityId: { $in: cityIds } });
       }
 
       if (tag === "search_all") {
-          blogsData = await Blog.find({ 
-              $or: [
-                  { title: new RegExp(search, 'i') },
-                  { tags: new RegExp(search, 'i') }
-              ]
-          });
+        // Step 1: Search in Users
+        usersData = await User.find({
+            $or: [
+                { name: new RegExp(search, 'i') },
+                { hotelName: new RegExp(search, 'i') }
+            ]
+        }).populate('amenitiesId').populate('foodAndDiningId').populate('propertyTypeId');
+    
+        // Step 2: Search in Guides
+        guidesData = await Guid.find({ name: new RegExp(search, 'i') });
+    
+        // Step 3: Search in Blogs
+        blogsData = await Blog.find({
+            $or: [
+                { title: new RegExp(search, 'i') },
+                { tags: new RegExp(search, 'i') }
+            ]
+        });
+    
+        // Step 4: Search in Tours and Events
+        tourAndEvents = await EventTour.find({
+            $or: [
+                { title: new RegExp(search, 'i') },
+                { description: new RegExp(search, 'i') }
+            ]
+        });
+    
+        // Step 5: Collect all cityIds from the results
+        const cityIds = new Set();
+    
+        usersData.forEach(user => user.cityId && cityIds.add(user.cityId));
+        guidesData.forEach(guide => guide.cityId && cityIds.add(guide.cityId));
+        blogsData.forEach(blog => blog.cityId && cityIds.add(blog.cityId));
+        tourAndEvents.forEach(event => event.cityId && cityIds.add(event.cityId));
+    
+        const cityIdArray = Array.from(cityIds);
+    
+        // Step 6: Cross-query remaining data using cityIds
+        if (cityIdArray.length > 0) {
+            // Fetch additional users
+            const additionalUsers = await User.find({ cityId: { $in: cityIdArray } })
+                .populate('amenitiesId')
+                .populate('foodAndDiningId')
+                .populate('propertyTypeId');
+    
+            // Fetch additional guides
+            const additionalGuides = await Guid.find({ cityId: { $in: cityIdArray } });
+    
+            // Fetch additional blogs
+            const additionalBlogs = await Blog.find({ cityId: { $in: cityIdArray } });
+    
+            // Fetch additional tours and events
+            const additionalTourAndEvents = await EventTour.find({ cityId: { $in: cityIdArray } });
+    
+            // Append additional data
+            usersData = [...usersData, ...additionalUsers];
+            guidesData = [...guidesData, ...additionalGuides];
+            blogsData = [...blogsData, ...additionalBlogs];
+            tourAndEvents = [...tourAndEvents, ...additionalTourAndEvents];
+        }
       }
+    
 
       const result = {
           users: usersData,
           guides: guidesData,
-          blogs: blogsData
+          blogs: blogsData,
+          eventAndtours: tourAndEvents
       };
 
       return res.status(200).json(result);

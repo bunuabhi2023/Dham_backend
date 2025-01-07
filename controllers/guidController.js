@@ -150,22 +150,53 @@ exports.deleteGuid = catchError(async(req, res) =>{
     return res.status(200).json({message:"Record Deleted Successfuly!"});
 });
 
-exports.getGuides = catchError(async(req, res) =>{
-    const guids = await Guid.find().populate('cityId', 'name').select('-password').lean().exec();
-    const ratings = [3.5, 4, 4.5]; // Predefined ratings
-    const updatedGuids = guids.map(guid => {
-        const guidObj = guid.toObject ? guid.toObject() : guid; // Ensure we can access as an object
-        guidObj.id = guidObj._id;
-        delete guidObj._id;
+exports.getGuides = catchError(async (req, res) => {
+  const { search, short_by } = req.query; // Extract search and short_by from request query
 
-        // Add a random rating from the predefined set
-        guidObj.rating = ratings[Math.floor(Math.random() * ratings.length)];
+  // Base query object
+  let query = {};
 
-        return guidObj;
-    });
+  // 1. Filter by search (on 'name' field)
+  if (search) {
+      query.name = new RegExp(search, 'i'); // Case-insensitive search on name
+  }
 
-    return res.status(200).json({ data: updatedGuids });
+  // 2. Filter by language (if short_by is 'english')
+  if (short_by === 'english') {
+      query['languages.name'] = 'English';
+  }
+
+  // Fetch filtered guides
+  let guids = await Guid.find(query)
+      .populate('cityId', 'name')
+      .select('-password')
+      .lean()
+      .exec();
+
+  // 3. Add random ratings
+  const ratings = [3.5, 4, 4.5]; // Predefined ratings
+  let updatedGuids = guids.map(guid => {
+      const guidObj = guid.toObject ? guid.toObject() : guid; // Ensure we can access as an object
+      guidObj.id = guidObj._id;
+      delete guidObj._id;
+
+      // Add a random rating from the predefined set
+      guidObj.rating = ratings[Math.floor(Math.random() * ratings.length)];
+
+      return guidObj;
+  });
+
+  // 4. Sort by pricePerHour if short_by is 'price'
+  if (short_by === 'price') {
+      updatedGuids.sort((a, b) => (a.pricePerHour || 0) - (b.pricePerHour || 0));
+  }else if (short_by === 'rating') {
+      // Sort by rating (descending)
+      updatedGuids.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  }
+
+  return res.status(200).json({ data: updatedGuids });
 });
+
 
 exports.getGuideById = catchError(async(req, res) =>{
     const guide = await Guid.findById(req.params.id).populate('cityId', 'name').select('-password').lean().exec();

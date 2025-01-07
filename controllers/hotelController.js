@@ -233,7 +233,7 @@ exports.getHotelsForUser = catchError(async(req, res) =>{
 });
 
 exports.getHotelById = catchError(async(req, res) =>{
-  const hotel = await User.findById(req.params.id)
+    const hotel = await User.findById(req.params.id)
                         .populate('amenitiesId')
                         .populate('cityId', 'name')
                         .populate('countryId', 'name')
@@ -242,7 +242,32 @@ exports.getHotelById = catchError(async(req, res) =>{
                         .populate('foodAndDiningId', 'name')
                         .exec();
 
-  return res.status(200).json({data:hotel});
+  
+    const hotelRooms = await HotelsRooms.find({userId:req.params.id}).populate('roomCategoryId', 'name').populate('amenitiesId', 'name').lean().exec();
+    const cityId = hotel.cityId;
+    const nearbies = await NearBy.find({cityId:cityId});
+  
+    const hotelCoords = hotel.location.coordinates;
+  
+    const nearbiesWithDistances = nearbies.map(nearby => {
+        const nearbyCoords = nearby.location.coordinates;
+        if (!Array.isArray(nearbyCoords) || nearbyCoords.length !== 2) {
+            return {
+                ...nearby.toObject(),
+                distance: 'unknown'
+            };
+        }
+  
+        const distance = calculateDistance(hotelCoords, nearbyCoords).toFixed(2);
+        return {
+            ...nearby.toObject(),
+            distance:  `${distance} km`
+        };
+    });
+
+  return res.status(200).json({data:hotel,
+    hotelRooms,
+    nearbiesWithDistances});
 })
 
 
