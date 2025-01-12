@@ -78,8 +78,8 @@ exports.getAllEPuja = catchError(async(req, res) =>{
     
         let query = {};
         
-        if (req.query.title) {
-            query.title = req.query.title; 
+        if (req.query.search) {
+            query.title = new RegExp(req.query.search, 'i'); 
         }
         const ePujaLists = await EPuja.find(query)
         .skip((page - 1) * pageSize)

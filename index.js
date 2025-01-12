@@ -13,14 +13,9 @@ app.use('/backend/uploads', express.static('uploads'));
 app.use(
     cors({
         origin: [
-            "http://127.0.0.1:5173",
-            'http://localhost:5173',
-            "http://127.0.0.1:5174",
-            'http://localhost:5174',
+            
             "http://localhost:3000",
             "https://dham-super-admin.netlify.app",
-            "https://dham-super-admin.vercel.app",
-            "https://dham-three.vercel.app",
             "https://dham2.netlify.app"
           ],
           credentials: true,
@@ -30,7 +25,7 @@ app.use(
 app.use('/uploads', express.static('uploads'));
 // load config from env file
 require("dotenv").config();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 //middleware to parse json request body
 app.use(express.json());
