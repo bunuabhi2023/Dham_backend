@@ -53,7 +53,7 @@ router.post("/verify-otp",  userController.verifyOtp);
 router.post("/verify-email",  userController.verifyEmail);
 
 //Customer Route//
-router.post("/register-customer", customerController.signup);
+router.post("/register-customer", imageSingleUpload,auth,customerController.signup);
 router.post("/login-customer", customerController.login);
 router.post("/login-signup", customerController.auth);
 router.post("/otp-verify", customerController.verifyOtp);

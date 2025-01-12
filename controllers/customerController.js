@@ -45,7 +45,7 @@ function generateOTP() {
 
 exports.signup = catchError(async (req, res) => {
  
-        const { firstname, lastname, mobile, email} = req.body;
+        const { firstname, lastname, mobile, email, password, dob} = req.body;
         const otp = generateOTP();
 
         let savedCustomer = null;
@@ -54,22 +54,12 @@ exports.signup = catchError(async (req, res) => {
          mobile,
         });
         if(existingCustomer){
-          if (existingCustomer.mobile_verified_at != null) {
             return res.status(400).json({ message: 'User with Entered Mobile Number is already exists' });
-          }
+          
 
-          if(existingCustomer.mobile_verified_at == null){
-            existingCustomer.firstname = firstname;
-            existingCustomer.lastname = lastname;
-            existingCustomer.mobile = mobile;
-            existingCustomer.email = email;
-            existingCustomer.mobile_otp = otp;
-            savedCustomer = await existingCustomer.save();
 
-          }
-
-        }else{
-    
+        }
+        const file = req.s3FileUrl;
 
 
           const newCustomer = new Customer({
@@ -77,43 +67,43 @@ exports.signup = catchError(async (req, res) => {
             lastname,
             mobile,
             email,
-            password:null,
+            password:password,
             email_otp: null,
             mobile_otp: otp,
-            dob: null,
+            dob: dob,
             age:null,
             latitude: null,
             longitude: null,
             mobile_verified_at: null,
             email_verified_at: null,
-            file: null,
+            file: file,
           });
       
          savedCustomer =  await newCustomer.save();
 
-        }
+        
 
-       if(savedCustomer){
-          const accountSid = process.env.TWILIO_ACCOUNT_SID;
-          const authToken = process.env.TWILIO_AUTH_TOKEN;
-          const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+      //  if(savedCustomer){
+      //     const accountSid = process.env.TWILIO_ACCOUNT_SID;
+      //     const authToken = process.env.TWILIO_AUTH_TOKEN;
+      //     const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
       
-          // Create a Twilio client
-          const twilio = require('twilio')(accountSid, authToken);
+      //     // Create a Twilio client
+      //     const twilio = require('twilio')(accountSid, authToken);
           
-          // Send OTP message
-          const message = await twilio.messages.create({
-              body: `Your OTP code is: ${otp}`,
-              from: twilioPhoneNumber,
-              to: mobile
-          });
+      //     // Send OTP message
+      //     const message = await twilio.messages.create({
+      //         body: `Your OTP code is: ${otp}`,
+      //         from: twilioPhoneNumber,
+      //         to: mobile
+      //     });
       
-          if (message) {
-              console.log('OTP sent successfully:', message.sid);
-          } else {
-              console.error('Failed to send OTP.');
-          }
-       }
+      //     if (message) {
+      //         console.log('OTP sent successfully:', message.sid);
+      //     } else {
+      //         console.error('Failed to send OTP.');
+      //     }
+      //  }
 
     
         return res.status(201).json({ message: 'Customer created successfully! Please verify your number with otp sent to your mobile' });
@@ -331,7 +321,7 @@ exports.updateMyProfile = async(req, res) =>{
         
         const customerId = authenticatedUser._id;
     
-        const { name, email, mobile, dob } = req.body;
+        const { firstname, lastname, email, mobile, dob } = req.body;
         const updatedBy = req.customer.id;
     
        
@@ -374,7 +364,7 @@ exports.updateMyProfile = async(req, res) =>{
         }
           const updatedCustomer = await Customer.findByIdAndUpdate(
             customerId,
-            { name, email, mobile, dob, age, file, updatedBy, updatedAt: Date.now() },
+            { firstname, lastname, email, mobile, dob, age, file, updatedBy, updatedAt: Date.now() },
             { new: true }
           );
     
@@ -419,7 +409,7 @@ exports.getCustomerById = async (req, res) => {
 
 exports.updateCustomer = async(req,res) =>{
 
-    const { name, email, mobile, dob } = req.body;
+    const { firstname, lastname, email, mobile, dob } = req.body;
     const updatedBy = req.user.id;
 
     const file = req.s3FileUrl;
@@ -466,7 +456,7 @@ exports.updateCustomer = async(req,res) =>{
 
       const updatedCustomer = await Customer.findByIdAndUpdate(
         req.params.id,
-        { name, email, mobile, dob, age,  file, updatedBy, updatedAt: Date.now() },
+        {firstname, lastname, email, mobile, dob, age,  file, updatedBy, updatedAt: Date.now() },
         { new: true }
       );
 
