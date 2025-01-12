@@ -80,18 +80,59 @@ exports.publishBlog = catchError(async(req, res) =>{
     return res.status(201).json({message:"Blog Updated successfully!"})
 });
 
-exports.getAllBlogs = catchError(async(req, res) =>{
-    const blogs = await Blog.find({status:"published"}).populate('cityId', 'name').exec();
-    const updatedBlogs = blogs.map(blog => {
-        const blogObj = blog.toObject();
-        blogObj.id = blogObj._id;
-        delete blogObj._id;
-        
-        return blogObj;
-    });
-    return res.status(200).json({updatedBlogs});
+exports.getAllBlogs = catchError(async (req, res) => {
+    const { search } = req.query; // Get search query from request
 
+    // Build a match query based on search
+    const matchQuery = {
+        status: "published",
+    };
+
+    if (search) {
+        matchQuery.$or = [
+            { title: { $regex: search, $options: "i" } }, // Case-insensitive search in title
+            { tags: { $regex: search, $options: "i" } }, // Search in tags array
+        ];
+    }
+
+    const blogs = await Blog.aggregate([
+        {
+            $lookup: {
+                from: "cities", // Collection name of 'City'
+                localField: "cityId",
+                foreignField: "_id",
+                as: "city",
+            },
+        },
+        {
+            $unwind: {
+                path: "$city",
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $match: matchQuery,
+        },
+        {
+            $addFields: {
+                cityName: "$city.name",
+            },
+        },
+        {
+            $match: search
+                ? {
+                      $or: [
+                          { cityName: { $regex: search, $options: "i" } }, // Search in city name
+                          ...matchQuery.$or,
+                      ],
+                  }
+                : {},
+        },
+    ]);
+
+    return res.status(200).json({ blogs });
 });
+
 
 
 exports.getRecentBlogs = catchError(async(req, res) => {

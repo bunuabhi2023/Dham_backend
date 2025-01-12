@@ -100,7 +100,7 @@ const customers = new mongoose.Schema(
                 maxLength:255,
             }
         },
-        favorites: [{
+        wishlist: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: false,

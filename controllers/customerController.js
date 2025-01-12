@@ -485,23 +485,26 @@ exports.getMyFavorite = async(req, res) =>{
 
     const customerId = authenticatedUser._id;
 
-    const customer = await Customer.findById(customerId).select('-password').populate('favorites');
+    const customer = await Customer.findById(customerId).select('-password').populate('wishlist');
 
     if (!customer) {
       return res.status(404).json({ message: 'customer not found' });
     }
 
-    const wishlistDetails = await Promise.all(customer.favorites.map(async (wishlistItem) => {
+    const wishlistDetails = await Promise.all(customer.wishlist.map(async (wishlistItem) => {
       console.log(wishlistItem._id);
-      const escort = await User.findById(wishlistItem._id)
-        .populate('serviceIds', 'name')
-        .exec();
+      const hotel = await User.findById(wishlistItem._id)
+      .populate('amenitiesId', 'name')
+      .populate('propertyTypeId', 'name')
+      .populate('foodAndDiningId', 'name')
+      .select('-password')
+      .exec();
     
-    if (!escort) {
+    if (!hotel) {
       return null; // Handle the case where the product is not found
     }
     
-      return escort;
+      return hotel;
   }));
 
     return res.json({ wishlistDetails });
@@ -523,16 +526,14 @@ exports.addTofavorite = async (req, res) => {
     if (!customer) {
       return res.status(404).json({ message: 'Customer not found' });
     }
-    console.log('userId:', userId);
-    console.log('customer.favorites:', customer.favorites);
+   
 
-    if (!customer.favorites.includes(userId)) {
-      customer.favorites.push(userId);
-      console.log('Customer after adding to favorites:', customer);
+    if (!customer.wishlist.includes(userId)) {
+      customer.wishlist.push(userId);
       await customer.save();
     }
 
-    return res.status(200).json({data:customer, message: 'Added As Favirate successfully' });
+    return res.status(200).json({data:customer, message: 'Added to wishlist successfully' });
   } catch (error) {
     console.error('Error:', error);
     return res.status(500).json({ message: 'An error occurred' });
@@ -551,13 +552,13 @@ exports.removeFromFavorite = async (req, res) => {
       return res.status(404).json({ message: 'Customer not found' });
     }
 
-    const productIndex = customer.favorites.indexOf(userId);
+    const productIndex = customer.wishlist.indexOf(userId);
     if (productIndex !== -1) {
-      customer.favorites.splice(productIndex, 1); // Remove the product from the wishlist array
+      customer.wishlist.splice(productIndex, 1); // Remove the product from the wishlist array
       await customer.save();
-      return res.status(200).json({ message: 'Removed from favorites successfully' });
+      return res.status(200).json({ message: 'Removed from wishlist successfully' });
     } else {
-      return res.status(404).json({ message: 'Not found in favorites' });
+      return res.status(404).json({ message: 'Not found in wishlist' });
     }
   } catch (error) {
     console.error('Error:', error);
@@ -922,3 +923,4 @@ exports.search = catchError(async (req, res) => {
       return res.status(500).json({ message: 'An error occurred while searching.' });
   }
 });
+
